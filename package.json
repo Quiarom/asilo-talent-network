@@ -10,7 +10,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "check": "astro check",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@googleapis/sheets": "^14.0.0",
@@ -22,6 +23,7 @@
     "@astrojs/check": "^0.9.10",
     "@astrojs/ts-plugin": "^1.10.11",
     "@astrojs/vercel": "^11.0.10",
+    "@playwright/test": "1.56.1",
     "@types/node": "26.4.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.11"

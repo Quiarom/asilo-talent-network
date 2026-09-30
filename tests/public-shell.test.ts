@@ -135,12 +135,11 @@ describe("CTA separation (join vs. add project)", () => {
 });
 
 describe("CTA heading", () => {
-  it("keeps decode text plain and lets mobile CSS control its two-line wrap", () => {
-    const page = readFileSync(new URL("../src/pages/index.astro", import.meta.url), "utf8");
-    const styles = readFileSync(new URL("../src/styles/global.css", import.meta.url), "utf8");
+  // Its mobile wrap is checked in the browser (e2e/layout.spec.ts).
+  it("keeps the decode text plain, without manual line breaks", async () => {
+    const html = await renderShell();
 
-    expect(page).toContain('data-decode>Deja de construir solo</h2>');
-    expect(page).not.toContain("cta-title-mobile-break");
-    expect(styles).toContain(".cta-title { max-width: 16ch; margin-inline: auto; }");
+    expect(html).toContain('data-decode>Deja de construir solo</h2>');
+    expect(html).not.toContain("cta-title-mobile-break");
   });
 });
