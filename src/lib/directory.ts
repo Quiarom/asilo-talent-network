@@ -18,3 +18,9 @@ export function resolveSort(raw: string | null | undefined): SortMode {
 export async function loadDirectory(sort: SortMode): Promise<Project[]> {
   return sortProjects(await loadApprovedProjects(), sort);
 }
+
+/** One approved project by public id, or `null`. */
+export async function findProject(id: string): Promise<Project | null> {
+  const projects = await loadApprovedProjects();
+  return projects.find((project) => project.id === id) ?? null;
+}

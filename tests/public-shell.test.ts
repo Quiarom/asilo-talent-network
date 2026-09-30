@@ -105,7 +105,7 @@ describe("Proyectos directory (slice 1b-b)", () => {
     expect(html).toContain('class="prj-title" data-decode>Proyectos');
     expect((html.match(/class="prj-item"/g) ?? []).length).toBe(10);
     expect((html.match(/Directorio de Builders/g) ?? []).length).toBe(10);
-    expect((html.match(/<a\b[^>]*class=["']prj-item["'][^>]*href="#"/g) ?? []).length).toBe(10);
+    expect((html.match(/<a\b[^>]*class=["']prj-link["'][^>]*href="#"/g) ?? []).length).toBe(10);
     expect(html).toContain("AGREGA TU PROYECTO");
     expect(html).toContain("¿Construiste algo? Súmalo al directorio.");
   });

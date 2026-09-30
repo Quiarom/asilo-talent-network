@@ -24,6 +24,7 @@ describe("ProjectDirectory", () => {
     expect(html).toContain('data-project-nav="previous"');
     expect(html).toContain('data-project-nav="next"');
     expect(html).toContain('id="project-directory-list"');
+    // Projects without a detail page (no id) keep opening their site.
     expect((html.match(/target="_blank" rel="noopener noreferrer"/g) ?? []).length).toBe(20);
     expect((html.match(/icons\/pixelarticons\/box\.svg/g) ?? []).length).toBe(20);
     expect(readFileSync(new URL("../src/components/ProjectDirectory.astro", import.meta.url), "utf8"))
@@ -94,6 +95,25 @@ describe("ProjectDirectory", () => {
     expect(html).toMatch(/<form class="prj-sort" method="get" action="\/#proyectos"/);
     expect(html).toContain('<option value="za" selected>Nombre: Z–A</option>');
     expect(html).toContain('<option value="az">Nombre: A–Z</option>');
+  });
+
+  it("links published projects to their detail page", async () => {
+    const projects: Project[] = [
+      {
+        href: "https://panapay.com",
+        title: "Pana Pay",
+        description: "Pagos",
+        author: "Ana",
+        tags: ["Fintech"],
+        id: "0123456789ab",
+        slug: "pana-pay-0123456789ab",
+      },
+    ];
+    const container = await AstroContainer.create();
+    const html = await container.renderToString(ProjectDirectory, { props: { projects } });
+
+    expect(html).toContain('href="/proyectos/pana-pay-0123456789ab"');
+    expect(html).not.toContain('href="https://panapay.com"');
   });
 
   it("puts uploaded logos on the logo tile and keeps category icons otherwise", async () => {
