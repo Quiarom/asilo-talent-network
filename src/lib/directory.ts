@@ -7,6 +7,7 @@
 
 import type { Project } from "../data/projects";
 import { getEngagementStore } from "./engagement";
+import type { PublicComment } from "./engagement/types";
 import { loadApprovedProjects } from "./projects-loader";
 import { parseSortMode, sortProjects, type SortMode } from "./project-sort";
 
@@ -60,9 +61,23 @@ export async function findProject(id: string): Promise<Project | null> {
   return projects.find((project) => project.id === id) ?? null;
 }
 
-/** Everything the detail page shows: the project with its like count. */
-export async function loadProjectPage(id: string): Promise<{ project: Project } | null> {
+/**
+ * Everything the detail page shows. Engagement is optional: if the store is
+ * down the project still renders, without likes and comments.
+ */
+export async function loadProjectPage(
+  id: string,
+): Promise<{ project: Project; comments: PublicComment[] } | null> {
   const project = await findProject(id);
   if (!project) return null;
-  return { project: withLikes(project, await likeCounts()) };
+
+  const store = getEngagementStore();
+  if (!store.enabled) return { project, comments: [] };
+  try {
+    const [likes, comments] = await Promise.all([likeCounts(), store.approvedComments(id)]);
+    return { project: withLikes(project, likes), comments };
+  } catch {
+    console.error("[directory] comments unavailable for project page");
+    return { project: withLikes(project, counts?.value ?? null), comments: [] };
+  }
 }

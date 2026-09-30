@@ -38,3 +38,20 @@ export async function verifyTurnstile(
     return false;
   }
 }
+/**
+ * Shared gate for public forms: `null` when the request may proceed (captcha
+ * solved, or Turnstile not configured), otherwise the error to return.
+ */
+export async function checkTurnstile(
+  form: FormData,
+): Promise<null | { status: 400 | 403; error: string }> {
+  if (!turnstileConfigured()) return null;
+  const token = form.get("cf-turnstile-response");
+  if (typeof token !== "string" || token.trim() === "") {
+    return { status: 400, error: "Completá la verificación para enviar." };
+  }
+  if (!(await verifyTurnstile(token, import.meta.env.TURNSTILE_SECRET_KEY))) {
+    return { status: 403, error: "La verificación falló. Recargá e intentá de nuevo." };
+  }
+  return null;
+}

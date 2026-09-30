@@ -462,6 +462,17 @@ h1 {
 .pd-author { color: var(--blue-800); font-size: .875rem; }
 .pd-desc { color: var(--blue-700); font-size: 1.125rem; line-height: 1.5; }
 .pd-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
+.pd-comments { display: flex; flex-direction: column; gap: 1.25rem; margin-top: 1.5rem; padding-top: 2rem; border-top: 1px solid var(--slate-700); }
+.pd-comments-title { color: var(--blue-100); font-size: 1.5rem; line-height: 1.33; font-weight: 500; letter-spacing: -.015em; }
+.pd-comments-count, .pd-comments-empty { color: var(--blue-800); }
+.pd-comment-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.pd-comment { display: flex; flex-direction: column; gap: .375rem; padding: 1rem 0; border-bottom: 1px solid var(--slate-800); }
+.pd-comment-meta { display: flex; gap: .75rem; align-items: baseline; color: var(--blue-800); font-size: .75rem; }
+.pd-comment-meta strong { color: var(--blue-100); font-size: .875rem; font-weight: 500; }
+.pd-comment-body { color: var(--blue-700); font-size: 1rem; line-height: 1.5; white-space: pre-line; overflow-wrap: anywhere; }
+.pd-comment-form { display: flex; flex-direction: column; gap: 1rem; }
+.pd-comment-footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.pd-comment-note { color: var(--blue-800); font-size: .75rem; line-height: 1rem; max-width: 28rem; }
 @media (max-width: 480px) {
   .pd-head { align-items: flex-start; }
   .pd-thumb { width: 4rem; height: 4rem; }

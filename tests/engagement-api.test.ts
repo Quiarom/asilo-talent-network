@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST as like } from "../src/pages/api/projects/[id]/like";
+import { POST as comment } from "../src/pages/api/projects/[id]/comments";
 import { setEngagementStoreForTests } from "../src/lib/engagement";
 import { resetDirectoryCache } from "../src/lib/directory";
 import { createMemoryStore } from "../src/lib/engagement/memory-store";
@@ -97,3 +98,51 @@ describe("POST /api/projects/:id/like", () => {
   });
 });
 
+function commentCtx(fields: Record<string, string>, ip: string) {
+  const form = new FormData();
+  for (const [key, value] of Object.entries(fields)) form.set(key, value);
+  const request = new Request("https://builders.test/api/projects/0123456789ab/comments", {
+    method: "POST",
+    body: form,
+  });
+  return { params: { id: PROJECT.id }, request, clientAddress: ip } as unknown as Parameters<typeof comment>[0];
+}
+
+const valid = () => ({
+  autor: "María",
+  comentario: "¡Muy buena idea! ¿Tienen app móvil?",
+  submitted_at: String(Date.now() - 10_000),
+});
+
+describe("POST /api/projects/:id/comments", () => {
+  it("stores valid comments as pending, never published directly", async () => {
+    const res = await comment(commentCtx(valid(), "198.51.100.1"));
+    expect(res.status).toBe(201);
+    expect(fake.comments).toHaveLength(1);
+    expect(fake.comments[0]).toMatchObject({ status: "pending", author: "María" });
+    expect(fake.comments[0].ipHash).toMatch(/^[0-9a-f]{64}$/);
+    expect(await fake.store.approvedComments(PROJECT.id)).toEqual([]);
+  });
+
+  it("fakes success for the honeypot and stores nothing", async () => {
+    const res = await comment(commentCtx({ ...valid(), contact_email: "bot@spam.test" }, "198.51.100.2"));
+    expect(res.status).toBe(201);
+    expect(fake.comments).toHaveLength(0);
+  });
+
+  it("rejects instant submissions and link spam", async () => {
+    const fast = await comment(commentCtx({ ...valid(), submitted_at: String(Date.now()) }, "198.51.100.3"));
+    expect(fast.status).toBe(429);
+    const spam = await comment(commentCtx({ ...valid(), comentario: "compra en https://a.ru y https://b.ru" }, "198.51.100.3"));
+    expect(spam.status).toBe(400);
+    expect(await spam.json()).toMatchObject({ field: "comentario" });
+    expect(fake.comments).toHaveLength(0);
+  });
+
+  it("rate-limits one connection to three comments per window", async () => {
+    for (let i = 0; i < 3; i += 1) {
+      expect((await comment(commentCtx(valid(), "198.51.100.4"))).status).toBe(201);
+    }
+    expect((await comment(commentCtx(valid(), "198.51.100.4"))).status).toBe(429);
+  });
+});

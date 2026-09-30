@@ -31,6 +31,7 @@ const SURFACES: Array<{ file: string; envVar: string }> = [
   { file: "lib/engagement/index.ts", envVar: "APPWRITE_API_KEY" },
   { file: "lib/engagement/index.ts", envVar: "APPWRITE_DATABASE_ID" },
   { file: "lib/engagement/index.ts", envVar: "ENGAGEMENT_SECRET" },
+  { file: "lib/turnstile.ts", envVar: "TURNSTILE_SECRET_KEY" },
 ];
 
 describe("env read surface", () => {
