@@ -1,32 +1,61 @@
-# Asilo — Talent Network
+# Asilo Builders
 
-Landing page for **Asilo**, a talent network connecting Venezuelan tech talent
-with companies hiring inside Venezuela.
+[builders.asilodigital.com](https://builders.asilodigital.com) — the meeting point
+of Venezuela's builder community: who we are, how to join, and a directory of the
+projects members are building.
 
-Static site — plain HTML, CSS and JS. No build step. Open `index.html` in a
-browser, or serve the folder with any static host.
+## Stack
 
-## Structure
+- **Astro 7** (SSR) deployed on **Vercel**
+- **Google Sheets** (private) — project submissions and moderation (`SI` / `NO` / `PENDIENTE`)
+- **Appwrite** — logo storage, likes and comments (TablesDB)
+- **Cloudflare Turnstile** — captcha on public forms
+- Plain CSS with design tokens — see [`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md)
 
-- `index.html` — page content (bilingual via `data-es` / `data-en` attributes)
-- `styles.css` — design system + all styling (dark, editorial)
-- `script.js` — language toggle, scroll reveal, nav state, CTA wiring
+## Run it locally
 
-## Before going live — set the real links
-
-Open `script.js` and edit the two constants at the top:
-
-```js
-const APPLY_URL   = "#";  // → the talent application form (Tally / Typeform / Google Form)
-const COMPANY_URL = "mailto:hola@asilo.network...";  // → where company inquiries go
+```sh
+pnpm install
+DEMO_DATA=1 pnpm dev        # fictional projects + in-memory likes/comments, no credentials
 ```
 
-Every "Aplica / Apply" button reads `APPLY_URL`, and every company button reads
-`COMPANY_URL`, so you only change them in one place. External `http(s)` links
-open in a new tab automatically.
+With real data, copy `.env.example` to `.env.local` and fill it in. Without
+credentials the site still runs: the directory shows placeholder cards and
+likes/comments are hidden.
 
-## Language
+## Scripts
 
-Spanish is the default. The **ES / EN** toggle in the nav switches all copy and
-remembers the choice. To edit a string, change both `data-es` and `data-en`
-on the element (or the `data-es-html` / `data-en-html` pair where markup is used).
+| Command | What it does |
+|---|---|
+| `pnpm dev` | Dev server |
+| `pnpm check` | Type-check (`astro check`) |
+| `pnpm test` | Unit and component tests (Vitest). Never touches real services. |
+| `pnpm test:e2e` | Browser tests (Playwright) against `DEMO_DATA=1` |
+| `pnpm build` | Production build |
+
+## How the directory works
+
+- Each sheet row is an immutable **revision**. A project is identified by its
+  normalized website; the **latest approved** revision is what the site shows.
+- **New projects** and **edit requests** ("Solicita cambios" on a project page)
+  both append a `PENDIENTE` row. Approving = setting it to `SI`. Edit requests
+  carry the requester's contact in *Notas adicionales*.
+- **Comments** are stored as `pending` in Appwrite and only `approved` ones are
+  shown. Until there is a back office, moderate them in the Appwrite console
+  (`builders` → `project_comments` → `status`).
+- Likes and comments need the Appwrite tables: `node scripts/setup-appwrite.mjs`.
+
+## Layout
+
+```
+src/
+  pages/            routes: home, /proyectos/[slug], partials, /api/*
+  layouts/          BaseLayout (head, header, footer)
+  components/       directory, card, like button, submit/edit modal
+  lib/              domain logic (pure) and adapters (Sheets, Appwrite)
+  lib/engagement/   likes & comments port + Appwrite / memory adapters
+  scripts/          browser scripts (ASCII background, reveal, likes)
+  styles/           tokens + components
+tests/              Vitest
+e2e/                Playwright
+```

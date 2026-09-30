@@ -8,14 +8,19 @@ update this file.
 - **Aesthetic in one line:** a dark, terminal/pixel world — navy‑black ground,
   one sky‑blue accent, a pixel display face over clean sans body, hairline
   borders, and restrained ambient motion.
-- **Stack:** Astro (SSR, but the landing page is `prerender`ed) · vanilla JS ·
+- **Stack:** Astro (SSR on Vercel; the homepage reads the directory per request) · vanilla JS ·
   plain CSS with custom‑property tokens. **No CSS framework, no UI/animation
   libraries.** Prefer native elements (`<dialog>`, form validation) over deps.
 - **Canonical files:**
   - `src/styles/global.css` — tokens + every component (the real source of truth)
   - `src/styles/fonts.css` — `@font-face` for Doto + IBM Plex Sans
-  - `src/pages/index.astro` — page composition
-  - `src/components/ProjectDirectory.astro` — Proyectos list + the modal form
+  - `src/layouts/BaseLayout.astro` — `<head>`, header, footer shared by every page
+  - `src/pages/index.astro` — homepage composition
+  - `src/pages/proyectos/[slug].astro` — project detail (likes, comments, edit request)
+  - `src/components/ProjectDirectory.astro` — Proyectos head, sort control, carousel
+  - `src/components/ProjectCard.astro` / `ProjectPages.astro` — card + carousel pages
+  - `src/components/ProjectFormModal.astro` — the add / edit-request modal form
+  - `src/components/LikeButton.astro` — like toggle
   - `src/scripts/` — `ascii-background.js`, `ascii-cursor.js`, `scroll-reveal.js`
 
 ---
@@ -162,8 +167,48 @@ All class names live in `global.css`. Specs below are the current truth.
   outer border with `--slate-800` internal dividers (no per‑card boxes).
 - **Project card** (`.prj-item`): transparent at rest; **hover/focus** → bg
   `--slate-800` panel + reveal a `--blue-500` external‑link icon by the title.
+- The card is an `<article>`; its title link (`.prj-link`) is **stretched** over
+  the whole card (`::after`, `inset: 0`), so the card stays one click target while
+  the like button (z-index 1) remains its own control. Focus ring shows on the
+  card via `:has(.prj-link:focus-visible)`.
+- **Logo tile** (`.prj-thumb:has(.prj-logo)`, `.logo-tile`, `.pd-thumb`): uploaded
+  logos sit on `--slate-50` with an inset `--sky-alpha-16` hairline.
+  **Proposed extension, pending design approval** — the one light surface in the
+  dark world: most marks are drawn for white
+  paper and transparent PNGs with dark ink vanish on `--bg`. Category icons (no
+  upload) keep the dark `--slate-900` thumb.
 - **Chips/tags** (`.prj-tag`): bg `--slate-900`, `--blue-800` text, pill radius,
   11px uppercase.
+
+### Like toggle (`.like`, `LikeButton.astro`)
+Built only from existing button variants — no new shape:
+- **Card:** the **Text** variant (same as `.modal-cancel`): no bg/border,
+  `--blue-700` → hover `--blue-50`, Label/Small (14/20, 500), 16px pixel heart
+  (`currentColor`) + count.
+- **Detail page:** the **Ghost** variant (`.button.button-secondary`) with a 20px
+  heart, next to the primary "Visitar" button.
+- **Pressed** (`aria-pressed="true"`): the heart's inner `.like-fill` path turns
+  on (filled heart); card text becomes `--blue-500`, ghost gets the
+  `--sky-alpha-10` fill it already uses on hover. State lives in `aria-pressed`,
+  not only in color.
+
+### Sort control (`.prj-sort`)
+Eyebrow label ("ORDENAR", 12px uppercase .04em, `--blue-800`) + native `<select>`
+with the exact `.field-input` spec (h40, `0 14px`, `--sky-alpha-16`, 4px, focus
+`--sky-alpha-24`, `--blue-50` text). The chevron is the section's pixel arrow
+rotated −90°. It is a GET form: works without JS; with JS it swaps the
+server-rendered partial. Wraps to its own row under 820px.
+
+### Detail page (`.pd`)
+Single 48rem column under the absolute header (`padding-top: --header-h + 3rem`):
+back link (pixel arrow, Label/Small) → logo tile + Doto 900 title (`data-decode`) → description
+(Paragraph/Large) → tags → actions (primary "Visitar" + large like) → "¿Es tu
+proyecto? Solicita cambios" → comments (hairline `--slate-700` top border, H3
+title, list with `--slate-800` separators, form reusing `.field*` inputs and
+`.modal-submit`).
+
+Inline text links inside prose (`.cta-note a`, `.pd-owner-link`) follow the
+footer-link convention: `--blue-500`, 500 weight, hover `--blue-50`, no underline.
 
 ### Inputs (modal form)
 - Text input `.field-input`: h40, `padding 0 14px`, bg `--bg`, border
@@ -172,6 +217,9 @@ All class names live in `global.css`. Specs below are the current truth.
 - Textarea box `.field-textarea-box`: same border, holds the textarea + a
   bottom‑right `.field-counter` (e.g. `0/140`).
 - Label `.field-label`: `--blue-700`, 14/20, 500.
+- Hint `.field-hint`: `#5c6470`, 12/16 (same literal as the dropzone hint).
+- Read-only input (`[readonly]`, e.g. the website in an edit request):
+  `--blue-700` text on `--sky-alpha-5`, `cursor: not-allowed`.
 
 ### Dropzone (`.dropzone`)
 Dashed `--sky-alpha-24` border, radius 4px; 46px icon tile (bg `--sky-alpha-5`,
