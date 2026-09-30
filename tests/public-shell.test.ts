@@ -30,7 +30,7 @@ describe("public shell", () => {
   it("preserves the live navigation and institutional sections", async () => {
     const html = await renderShell();
 
-    for (const label of ["Comunidad", "Proyectos", "Sobre nosotros", "Unete"]) {
+    for (const label of ["Comunidad", "Proyectos", "Sobre nosotros", "Únete"]) {
       expect(html).toContain(label);
     }
     expect(html).toContain("¿QUE HACEMOS?");
@@ -107,7 +107,7 @@ describe("Proyectos directory (slice 1b-b)", () => {
     expect((html.match(/Directorio de Builders/g) ?? []).length).toBe(10);
     expect((html.match(/<a\b[^>]*class=["']prj-item["'][^>]*href="#"/g) ?? []).length).toBe(10);
     expect(html).toContain("AGREGA TU PROYECTO");
-    expect(html).toContain("¿Eres parte de la comunidad y quieres sumarte al directorio?");
+    expect(html).toContain("¿Construiste algo? Súmalo al directorio.");
   });
 
   it("keeps the directory static: no external URLs and local placeholder assets", async () => {
@@ -118,6 +118,19 @@ describe("Proyectos directory (slice 1b-b)", () => {
     expect((html.match(/<img\b/g) ?? []).length).toBe(17);
     expect((html.match(/icons\/pixelarticons\/box\.svg/g) ?? []).length).toBe(10);
     expect(html).toContain('src="/logo-asilo-builders.svg"');
+  });
+});
+
+describe("CTA separation (join vs. add project)", () => {
+  it("keeps one join CTA per placement and points members to the directory", async () => {
+    const html = await renderShell();
+
+    // Header, hero and closing CTA join the community; nothing else does.
+    expect((html.match(/Únete a la comunidad/g) ?? []).length).toBe(2);
+    expect(html).not.toContain("Llenar formulario");
+    expect(html).not.toContain("qeb-cta");
+    // Existing members are told explicitly not to re-register.
+    expect(html).toMatch(/class="cta-note"[\s\S]*No necesitas registrarte de nuevo[\s\S]*href="#proyectos"/);
   });
 });
 

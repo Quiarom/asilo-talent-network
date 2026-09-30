@@ -14,6 +14,7 @@ const BLANK_INTEGRATION_ENV = Object.fromEntries(
     "APPWRITE_API_KEY",
     "TURNSTILE_SITE_KEY",
     "TURNSTILE_SECRET_KEY",
+    "PUBLIC_COMMUNITY_JOIN_URL",
   ].map((name) => [name, ""]),
 );
 
