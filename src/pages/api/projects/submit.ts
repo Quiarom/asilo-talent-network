@@ -29,7 +29,9 @@ import {
   MIN_FILL_MS,
   validateSubmission,
 } from "../../../lib/projects-submit";
+import { json } from "../../../lib/http";
 import { LOGO_BUCKET_ID, validateLogo } from "../../../lib/projects-logo";
+import { createRateLimiter } from "../../../lib/rate-limit";
 import {
   turnstileConfigured,
   verifyTurnstile,
@@ -44,31 +46,8 @@ const SHEET_RANGE = import.meta.env.GOOGLE_SHEETS_RANGE ?? "Projects!A1:J";
 // Anchor the table, not a row: Sheets detects its end and appends automatically.
 const APPEND_RANGE = "Projects!A1";
 
-const RATE_MAX = 5;
-const RATE_WINDOW_MS = 10 * 60_000;
-
-// ponytail: per-process sliding window; not shared across instances and resets
-// on restart — swap for Redis when the app runs multi-instance.
-const ipHits = new Map<string, number[]>();
-
-function rateLimited(ip: string): boolean {
-  const now = Date.now();
-  const hits = (ipHits.get(ip) ?? []).filter((t) => now - t < RATE_WINDOW_MS);
-  if (hits.length >= RATE_MAX) {
-    ipHits.set(ip, hits);
-    return true;
-  }
-  hits.push(now);
-  ipHits.set(ip, hits);
-  return false;
-}
-
-function json(body: unknown, status: number): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "content-type": "application/json; charset=utf-8" },
-  });
-}
+// ponytail: per-process sliding window (see lib/rate-limit.ts).
+const rateLimited = createRateLimiter(5, 10 * 60_000);
 
 export async function POST({ request, clientAddress }: APIContext) {
   // Fail-closed: no credentials, no writes.

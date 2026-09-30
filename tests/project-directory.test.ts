@@ -32,7 +32,7 @@ describe("ProjectDirectory", () => {
 
   it("shows a complete success state with actions instead of a buried status message", () => {
     const component = readFileSync(
-      new URL("../src/components/ProjectDirectory.astro", import.meta.url),
+      new URL("../src/components/ProjectFormModal.astro", import.meta.url),
       "utf8",
     );
 
@@ -52,7 +52,7 @@ describe("ProjectDirectory", () => {
 
   it("only closes from a genuine backdrop click, not a text-selection gesture", () => {
     const component = readFileSync(
-      new URL("../src/components/ProjectDirectory.astro", import.meta.url),
+      new URL("../src/components/ProjectFormModal.astro", import.meta.url),
       "utf8",
     );
 
@@ -74,14 +74,16 @@ describe("ProjectDirectory", () => {
     expect(styles).toContain('font-size: clamp(2rem, 5vw, 2.75rem)');
   });
 
-  it("refreshes the directory in the background without reloading the page", () => {
+  it("refreshes the directory from the server-rendered partial", () => {
     const component = readFileSync(
       new URL("../src/components/ProjectDirectory.astro", import.meta.url),
       "utf8",
     );
 
-    expect(component).toContain('fetch("/api/projects", { cache: "no-store" })');
-    expect(component).toContain("window.setInterval(refreshProjects, 30_000)");
+    // One renderer: the browser swaps in server HTML instead of rebuilding cards.
+    expect(component).toContain('fetch("/partials/proyectos"');
+    expect(component).not.toContain('document.createElement("a")');
+    expect(component).toContain("window.setInterval(refreshProjects, 60_000)");
     expect(component).toContain("document.visibilityState !== \"visible\"");
   });
 
