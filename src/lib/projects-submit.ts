@@ -14,7 +14,7 @@
  *   Categorías | Aprobado | ID del logo | ID de revisión | Notas adicionales
  */
 
-import { normalizeHeader } from "./projects-loader";
+import { normalizeHeader } from "./normalize";
 
 // Exact allowlist rendered by the modal's checkboxes, kept in Spanish
 // alphabetical order (Intl.Collator("es")) so the list is scannable. Server-side
