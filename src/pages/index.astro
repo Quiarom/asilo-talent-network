@@ -2,11 +2,12 @@
 import "../styles/fonts.css";
 import "../styles/global.css";
 import ProjectDirectory from "../components/ProjectDirectory.astro";
-import { loadApprovedProjects } from "../lib/projects-loader";
 import { joinLinkAttrs } from "../config/site";
+import { loadDirectory, resolveSort } from "../lib/directory";
 
 // Server-rendered: the directory reflects the sheet's current approval state.
-const projects = await loadApprovedProjects();
+const sort = resolveSort(Astro.url.searchParams.get("orden"));
+const projects = await loadDirectory(sort);
 ---
 
 <!doctype html>
@@ -116,7 +117,7 @@ const projects = await loadApprovedProjects();
         </p>
       </div>
     </section>
-    <ProjectDirectory projects={projects} />
+    <ProjectDirectory projects={projects} sort={sort} />
     <section class="cta" id="unete-cta" aria-labelledby="cta-title">
       <div class="cta-inner">
         <div class="cta-titles">

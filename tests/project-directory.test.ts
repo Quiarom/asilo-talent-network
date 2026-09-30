@@ -81,10 +81,19 @@ describe("ProjectDirectory", () => {
     );
 
     // One renderer: the browser swaps in server HTML instead of rebuilding cards.
-    expect(component).toContain('fetch("/partials/proyectos"');
+    expect(component).toContain("/partials/proyectos?orden=");
     expect(component).not.toContain('document.createElement("a")');
     expect(component).toContain("window.setInterval(refreshProjects, 60_000)");
     expect(component).toContain("document.visibilityState !== \"visible\"");
+  });
+
+  it("renders the sort control as a plain GET form with the current order selected", async () => {
+    const container = await AstroContainer.create();
+    const html = await container.renderToString(ProjectDirectory, { props: { projects: [], sort: "za" } });
+
+    expect(html).toMatch(/<form class="prj-sort" method="get" action="\/#proyectos"/);
+    expect(html).toContain('<option value="za" selected>Nombre: Z–A</option>');
+    expect(html).toContain('<option value="az">Nombre: A–Z</option>');
   });
 
   it("puts uploaded logos on the logo tile and keeps category icons otherwise", async () => {

@@ -1,19 +1,31 @@
 ---
 import type { Project } from "../data/projects";
+import { SORT_OPTIONS, type SortMode } from "../lib/project-sort";
 import ProjectFormModal from "./ProjectFormModal.astro";
 import ProjectPages from "./ProjectPages.astro";
 
 interface Props {
   projects: Project[];
+  sort?: SortMode;
 }
 
-const { projects } = Astro.props;
+const { projects, sort = "az" } = Astro.props;
 ---
 
 <section class="prj" id="proyectos">
   <div class="prj-inner">
     <div class="prj-head">
       <h2 class="prj-title" data-decode>Proyectos</h2>
+      <!-- Works without JS (GET reload); with JS it swaps in the sorted partial. -->
+      <form class="prj-sort" method="get" action="/#proyectos" data-project-sort>
+        <label class="prj-sort-label" for="project-sort">Ordenar</label>
+        <select class="prj-sort-select" id="project-sort" name="orden">
+          {SORT_OPTIONS.map((option) => (
+            <option value={option.value} selected={option.value === sort}>{option.label}</option>
+          ))}
+        </select>
+        <noscript><button class="prj-sort-go" type="submit">Aplicar</button></noscript>
+      </form>
       <div class="prj-nav">
         <button class="prj-arrow" type="button" aria-label="Anterior" aria-controls="project-directory-list" data-project-nav="previous">
           <svg viewBox="0 0 48 48" fill="currentColor" aria-hidden="true"><path d="M16 26V22H20V26H16ZM20 22V18H24V22H20ZM20 30V26H24V30H20ZM24 18V14H28V18H24ZM24 34V30H28V34H24ZM28 14V10H32V14H28ZM28 38V34H32V38H28Z" /></svg>
@@ -23,7 +35,7 @@ const { projects } = Astro.props;
         </button>
       </div>
     </div>
-    <div class="prj-carousel" id="project-directory-list">
+    <div class="prj-carousel" id="project-directory-list" aria-busy="false">
       <ProjectPages projects={projects} />
     </div>
     <div class="prj-cta-row">
@@ -33,12 +45,14 @@ const { projects } = Astro.props;
   </div>
 </section>
 
-<ProjectFormModal />
+<ProjectFormModal mode="create" />
 
 <script>
   import { gsap } from "gsap";
 
   const projectCarousel = document.getElementById("project-directory-list");
+  const sortForm = document.querySelector<HTMLFormElement>("[data-project-sort]");
+  const sortSelect = sortForm?.querySelector<HTMLSelectElement>("select") ?? null;
   let projectPages = Array.from(document.querySelectorAll<HTMLElement>("[data-project-page]"));
   const projectNavButtons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-project-nav]"));
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -48,25 +62,27 @@ const { projects } = Astro.props;
 
   // The server renders the cards (see /partials/proyectos); the browser only
   // swaps HTML in, so card markup exists in exactly one place.
-  const loadPartial = async () => {
+  const loadPartial = async (sort: string, { force = false } = {}) => {
     if (!projectCarousel) return;
-    const response = await fetch("/partials/proyectos", {
+    const response = await fetch(`/partials/proyectos?orden=${encodeURIComponent(sort)}`, {
       headers: { accept: "text/html" },
     });
     if (!response.ok) throw new Error(`partial ${response.status}`);
     const html = await response.text();
-    if (html === lastPartial) return;
+    if (!force && html === lastPartial) return;
     lastPartial = html;
     projectCarousel.innerHTML = html;
     projectPages = Array.from(projectCarousel.querySelectorAll<HTMLElement>("[data-project-page]"));
     projectPageIndex = 0;
   };
 
+  const currentSort = () => sortSelect?.value ?? "az";
+
   const refreshProjects = async () => {
     // Don't yank cards away from someone browsing later pages.
     if (document.visibilityState !== "visible" || projectPageIndex !== 0 || projectPageAnimating) return;
     try {
-      await loadPartial();
+      await loadPartial(currentSort());
     } catch {
       // Keep the last rendered directory when a background refresh fails.
     }
@@ -74,6 +90,22 @@ const { projects } = Astro.props;
 
   window.setInterval(refreshProjects, 60_000);
   document.addEventListener("visibilitychange", refreshProjects);
+
+  sortSelect?.addEventListener("change", async () => {
+    const sort = currentSort();
+    const url = new URL(window.location.href);
+    url.searchParams.set("orden", sort);
+    history.replaceState(null, "", url);
+    projectCarousel?.setAttribute("aria-busy", "true");
+    try {
+      await loadPartial(sort, { force: true });
+    } catch {
+      // Progressive enhancement: fall back to the plain GET form.
+      sortForm?.submit();
+    } finally {
+      projectCarousel?.setAttribute("aria-busy", "false");
+    }
+  });
 
   const showProjectPage = (nextPageIndex: number) => {
     if (projectPages.length === 0 || projectPageAnimating || nextPageIndex === projectPageIndex) return;
