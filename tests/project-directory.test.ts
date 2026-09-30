@@ -97,7 +97,7 @@ describe("ProjectDirectory", () => {
     expect(html).toContain('<option value="az">Nombre: A–Z</option>');
   });
 
-  it("links published projects to their detail page", async () => {
+  it("links published projects to their detail page and exposes likes only when enabled", async () => {
     const projects: Project[] = [
       {
         href: "https://panapay.com",
@@ -107,13 +107,21 @@ describe("ProjectDirectory", () => {
         tags: ["Fintech"],
         id: "0123456789ab",
         slug: "pana-pay-0123456789ab",
+        likes: 7,
       },
+      { href: "https://sin-likes.example", title: "Sin likes", description: "", author: "", tags: [], id: "ba9876543210", slug: "sin-likes-ba9876543210" },
     ];
     const container = await AstroContainer.create();
-    const html = await container.renderToString(ProjectDirectory, { props: { projects } });
+    const html = await container.renderToString(ProjectDirectory, {
+      props: { projects, sort: "populares", likesEnabled: true },
+    });
 
     expect(html).toContain('href="/proyectos/pana-pay-0123456789ab"');
     expect(html).not.toContain('href="https://panapay.com"');
+    expect((html.match(/data-like="/g) ?? []).length).toBe(1);
+    expect(html).toMatch(/data-like-count>7</);
+    expect(html).toMatch(/<option value="populares" selected>Más votados<\/option>/);
+    expect(html).toContain('<option value="za">Nombre: Z–A</option>');
   });
 
   it("puts uploaded logos on the logo tile and keeps category icons otherwise", async () => {
@@ -130,5 +138,15 @@ describe("ProjectDirectory", () => {
 
     expect(html).toMatch(/<div class="prj-thumb"[^>]*>\s*<img class="prj-logo" src="https:\/\/cdn\.example\/logo\.png"/);
     expect(html).toContain('src="/icons/pixelarticons/home.svg"');
+  });
+
+  it("hides the likes order when likes are not configured", async () => {
+    const container = await AstroContainer.create();
+    const html = await container.renderToString(ProjectDirectory, {
+      props: { projects: [], sort: "az", likesEnabled: false },
+    });
+
+    expect(html).not.toContain('value="populares"');
+    expect(html).toContain("Todavía no hay proyectos publicados.");
   });
 });

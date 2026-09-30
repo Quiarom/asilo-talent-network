@@ -2,7 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ProjectDirectory from "../components/ProjectDirectory.astro";
 import { joinLinkAttrs } from "../config/site";
-import { loadDirectory, resolveSort } from "../lib/directory";
+import { engagementEnabled, loadDirectory, resolveSort } from "../lib/directory";
 
 // Server-rendered: the directory reflects the sheet's current approval state.
 const sort = resolveSort(Astro.url.searchParams.get("orden"));
@@ -81,7 +81,7 @@ const projects = await loadDirectory(sort);
         </p>
       </div>
     </section>
-    <ProjectDirectory projects={projects} sort={sort} />
+    <ProjectDirectory projects={projects} sort={sort} likesEnabled={engagementEnabled()} />
     <section class="cta" id="unete-cta" aria-labelledby="cta-title">
       <div class="cta-inner">
         <div class="cta-titles">

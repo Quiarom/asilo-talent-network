@@ -1,15 +1,16 @@
 ---
 import type { Project } from "../data/projects";
 import { projectIconUrl } from "../lib/project-icons";
+import LikeButton from "./LikeButton.astro";
 
 interface Props {
   project: Project;
 }
 
 const { project } = Astro.props;
-// Published projects open their detail page;
+// Published projects open their detail page (likes, comments, edit request);
 // placeholders without an id keep their raw link. The title link is stretched
-// over the whole card in CSS.
+// over the whole card in CSS, so the like button stays a separate control.
 const internal = Boolean(project.slug);
 const linkAttrs = internal
   ? { href: `/proyectos/${project.slug}` }
@@ -37,6 +38,9 @@ const linkAttrs = internal
       <div class="prj-tags">
         {project.tags.map((tag) => <span class="prj-tag">{tag}</span>)}
       </div>
+      {project.id && project.likes !== undefined && (
+        <LikeButton projectId={project.id} title={project.title} likes={project.likes} />
+      )}
     </div>
   </div>
 </article>

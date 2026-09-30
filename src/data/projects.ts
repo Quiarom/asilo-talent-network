@@ -24,6 +24,8 @@ export type Project = {
   slug?: string;
   /** Sheet position of the project's first approved revision (for "recientes"). */
   addedIndex?: number;
+  /** Like count; `undefined` when likes are not configured. */
+  likes?: number;
 };
 
 const placeholderProject: Project = {
