@@ -16,32 +16,35 @@
 
 import { normalizeHeader } from "./projects-loader";
 
-// Exact allowlist rendered by the modal's 23 checkboxes. Server-side validation
-// accepts nothing outside these literal values.
+// Exact allowlist rendered by the modal's checkboxes, kept in Spanish
+// alphabetical order (Intl.Collator("es")) so the list is scannable. Server-side
+// validation accepts nothing outside these literal values.
 export const CATEGORIES = [
-  "Inteligencia Artificial",
-  "Fintech",
-  "Marketplace",
-  "Edtech",
-  "Healthtech",
   "Agritech",
-  "Logística",
-  "SaaS",
-  "DevTools & APIs",
-  "Blockchain & Crypto",
-  "Web3",
-  "E-commerce",
-  "Business Analytics",
-  "Data Science",
-  "Ciberseguridad",
   "AR / VR",
+  "Blockchain & Crypto",
+  "Business Analytics",
+  "Ciberseguridad",
+  "Data Science",
+  "DevTools & APIs",
+  "Diseño & Creatividad",
+  "E-commerce",
+  "Edtech",
+  "Energía & Clima",
+  "Fintech",
   "Gaming",
   "Hardware & IoT",
-  "No-Code & CMS",
-  "Social & Comunidad",
+  "Healthtech",
+  "Inteligencia Artificial",
+  "Legaltech",
+  "Logística",
+  "Marketplace",
   "Movilidad",
-  "Energía & Clima",
-  "Diseño & Creatividad",
+  "No-Code & CMS",
+  "Proptech",
+  "SaaS",
+  "Social & Comunidad",
+  "Web3",
 ] as const;
 
 export const MAX_CATEGORIES = 3;

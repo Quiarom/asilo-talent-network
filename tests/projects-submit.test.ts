@@ -251,3 +251,18 @@ describe("buildRow", () => {
     expect(withLogo).toHaveLength(10);
   });
 });
+
+describe("CATEGORIES", () => {
+  it("is listed in Spanish alphabetical order so the form is scannable", () => {
+    const sorted = [...CATEGORIES].sort(new Intl.Collator("es").compare);
+    expect([...CATEGORIES]).toEqual(sorted);
+  });
+
+  it("includes Legaltech and Proptech", () => {
+    expect(CATEGORIES).toContain("Legaltech");
+    expect(CATEGORIES).toContain("Proptech");
+    expect(
+      validateSubmission({ ...validInput, categorias: ["Legaltech", "Proptech"] }).ok,
+    ).toBe(true);
+  });
+});
