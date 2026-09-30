@@ -7,6 +7,7 @@
  */
 
 import { createHmac } from "node:crypto";
+import { demoEngagementStore, demoMode } from "../demo";
 import { createAppwriteStore } from "./appwrite-store";
 import { disabledStore } from "./disabled-store";
 import { DEFAULT_DATABASE_ID } from "./schema";
@@ -18,6 +19,7 @@ let cached: EngagementStore | null = null;
 export function getEngagementStore(): EngagementStore {
   if (override) return override;
   if (cached) return cached;
+  if (demoMode()) return (cached = demoEngagementStore());
 
   const endpoint = import.meta.env.APPWRITE_ENDPOINT;
   const projectId = import.meta.env.APPWRITE_PROJECT_ID;

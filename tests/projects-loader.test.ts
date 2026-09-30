@@ -449,3 +449,13 @@ describe("parseProjects revisions and identity", () => {
   });
 });
 
+describe("demo sheet", () => {
+  it("parses like a real sheet: approved only, latest revision wins", async () => {
+    const { DEMO_SHEET } = await import("../src/data/demo-sheet");
+    const projects = parseProjects(DEMO_SHEET);
+
+    expect(projects).toHaveLength(12);
+    expect(projects.map((p) => p.title)).not.toContain("Borrador");
+    expect(projects.find((p) => p.title === "Pana Pay")?.description).toContain("USDT");
+  });
+});

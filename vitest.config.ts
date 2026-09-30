@@ -17,6 +17,7 @@ const BLANK_INTEGRATION_ENV = Object.fromEntries(
     "TURNSTILE_SITE_KEY",
     "TURNSTILE_SECRET_KEY",
     "PUBLIC_COMMUNITY_JOIN_URL",
+    "DEMO_DATA",
   ].map((name) => [name, ""]),
 );
 

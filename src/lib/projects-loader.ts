@@ -35,6 +35,7 @@ import { LOGO_BUCKET_ID } from "./projects-logo";
 import { projectIconUrl } from "./project-icons";
 import { normalizeHeader } from "./normalize";
 import { projectIdFor, projectSlug } from "./project-identity";
+import { demoMode, demoSheet } from "./demo";
 
 const READONLY_SCOPE = "https://www.googleapis.com/auth/spreadsheets.readonly";
 
@@ -159,6 +160,7 @@ export async function loadApprovedProjects(
   fetchValues: ValuesFetcher = fetchSheetValues,
   options: { fresh?: boolean } = {},
 ): Promise<Project[]> {
+  if (demoMode()) return parseProjects(demoSheet());
   if (!isConfigured()) return placeholderProjects;
 
   if (!options.fresh && cached && Date.now() - cached.at < CACHE_TTL_MS) {
