@@ -1,6 +1,14 @@
 /**
  * Public project-submission endpoint — no auth by design.
  *
+ * Two modes share every anti-abuse layer:
+ * - `create` (default): a new project; rejected when the website exists.
+ * - `edit`: a change request for a PUBLISHED project (matched by website).
+ *   It appends a new `PENDIENTE` revision instead of touching the live row;
+ *   once approved, the loader serves it as the latest revision. The previous
+ *   logo is carried over when no new one is uploaded, and the requester's
+ *   contact goes into "Notas adicionales" so the team can verify ownership.
+ *
  * Validates untrusted form input server-side, quarantines it as a `PENDIENTE`
  * row (private sheet) and answers with JSON. Anti-abuse is in-process and
  * minimal: honeypot, min-time-to-fill, per-IP sliding-window rate limit and an
@@ -26,12 +34,14 @@ import { InputFile } from "node-appwrite/file";
 import {
   buildRow,
   findDuplicateWebsite,
+  findLatestApprovedRevision,
   MIN_FILL_MS,
+  validateContact,
   validateSubmission,
 } from "../../../lib/projects-submit";
 import { json } from "../../../lib/http";
-import { LOGO_BUCKET_ID, validateLogo } from "../../../lib/projects-logo";
 import { createRateLimiter } from "../../../lib/rate-limit";
+import { LOGO_BUCKET_ID, validateLogo } from "../../../lib/projects-logo";
 import {
   turnstileConfigured,
   verifyTurnstile,
@@ -126,6 +136,18 @@ export async function POST({ request, clientAddress }: APIContext) {
     );
   }
 
+  const mode = form.get("mode") === "edit" ? "edit" : "create";
+  let contact: string | null = null;
+  if (mode === "edit") {
+    contact = validateContact(String(form.get("contacto") ?? ""));
+    if (!contact) {
+      return json(
+        { ok: false, field: "contacto", error: "Déjanos un email o @usuario (3 a 120 caracteres)." },
+        400,
+      );
+    }
+  }
+
   const validation = validateSubmission({
     nombre: String(form.get("nombre") ?? ""),
     website: String(form.get("website") ?? ""),
@@ -200,6 +222,8 @@ export async function POST({ request, clientAddress }: APIContext) {
 
   // Idempotency: reject when the same normalized website already exists in the
   // sheet (pending OR approved) — same project, same row, never duplicated.
+  // Edit requests are the opposite: the website MUST belong to a published
+  // project, and they carry its current logo forward.
   // DEV-ONLY OVERRIDE: when `DEV_ALLOW_DUPLICATE_WEBSITE` is set to a truthy
   // value ("1"/"true"/"yes") in `.env.local`, the dedupe is skipped so a
   // developer can re-test submissions against the same project. Never set
@@ -209,18 +233,15 @@ export async function POST({ request, clientAddress }: APIContext) {
     ["1", "true", "yes"].includes(
       String(import.meta.env.DEV_ALLOW_DUPLICATE_WEBSITE ?? "").toLowerCase(),
     );
-  if (!devOverride) {
+  let notes: string | undefined;
+  if (mode === "edit" || !devOverride) {
+    let values: string[][];
     try {
       const { data } = await sheets.spreadsheets.values.get({
         spreadsheetId: import.meta.env.GOOGLE_SHEETS_ID!,
         range: SHEET_RANGE,
       });
-      if (findDuplicateWebsite(data.values ?? [], validation.value.website)) {
-        return json(
-          { ok: false, error: "Este proyecto ya fue enviado al directorio." },
-          409,
-        );
-      }
+      values = data.values ?? [];
     } catch {
       return json(
         {
@@ -230,6 +251,23 @@ export async function POST({ request, clientAddress }: APIContext) {
         503,
       );
     }
+
+    if (mode === "edit") {
+      const current = findLatestApprovedRevision(values, validation.value.website);
+      if (!current) {
+        return json(
+          { ok: false, error: "No encontramos un proyecto publicado con ese sitio web." },
+          404,
+        );
+      }
+      logoId ??= current.logoId || undefined;
+      notes = `Solicitud de edición de ${current.revisionId || "la revisión publicada"} · Contacto: ${contact}`;
+    } else if (findDuplicateWebsite(values, validation.value.website)) {
+      return json(
+        { ok: false, error: "Este proyecto ya fue enviado al directorio. Si es tuyo, abre su página y usa «Solicita cambios»." },
+        409,
+      );
+    }
   }
 
   try {
@@ -237,7 +275,7 @@ export async function POST({ request, clientAddress }: APIContext) {
       spreadsheetId: import.meta.env.GOOGLE_SHEETS_ID!,
       range: APPEND_RANGE,
       valueInputOption: "USER_ENTERED",
-      requestBody: { values: [buildRow(validation.value, { logoId })] },
+      requestBody: { values: [buildRow(validation.value, { logoId, notes })] },
     });
   } catch {
     return json(

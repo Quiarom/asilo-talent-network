@@ -1,26 +1,63 @@
 ---
 /**
- * "Agrega tu proyecto" modal. Posts to `/api/projects/submit`, which
- * quarantines the project as `PENDIENTE`. Any element with
- * `data-open-modal` opens it.
+ * "Agrega tu proyecto" / "Solicitar cambios" modal.
+ *
+ * One form, two modes, one endpoint (`POST /api/projects/submit`):
+ * - `create`: a new project, quarantined as `PENDIENTE`.
+ * - `edit`: a new revision of an already published project (website locked),
+ *   also `PENDIENTE`. Once the team approves it, the loader publishes the
+ *   latest approved revision, so nobody edits the sheet by hand anymore.
+ *
+ * Any element with `data-open-modal` opens it.
  */
+import type { Project } from "../data/projects";
 import { CATEGORIES, MAX_CATEGORIES } from "../lib/projects-submit";
 
+interface Props {
+  mode?: "create" | "edit";
+  /** Prefill for `edit` mode. */
+  project?: Project;
+}
+
+const { mode = "create", project } = Astro.props;
+const editing = mode === "edit" && project !== undefined;
+const copy = editing
+  ? {
+      title: "Solicitar cambios",
+      sub: "Actualiza la información de tu proyecto. Revisamos cada cambio antes de publicarlo.",
+      submit: "Enviar cambios",
+      successA: "Tus cambios están",
+      successB: "en revisión",
+      successP: "Te avisaremos por tu contacto si necesitamos algo más.",
+      logoHint: "Opcional · deja vacío para mantener el logo actual · PNG, JPG o WebP · máx. 1 MB",
+    }
+  : {
+      title: "Agrega tu proyecto",
+      sub: "Súmalo al directorio de builders de Venezuela.",
+      submit: "Agregar tu proyecto",
+      successA: "Tu proyecto ya está",
+      successB: "en revisión",
+      successP: "Gracias por sumarte.",
+      logoHint: "Opcional · PNG, JPG o WebP · máx. 1 MB · ideal cuadrado. Se muestra sobre fondo claro, como en la vista previa.",
+    };
+const selected = new Set(editing ? project.tags : []);
+const description = editing ? project.description : "";
 // Public site key — safe to embed; widget only renders when it's configured.
 const TURNSTILE_SITE_KEY = import.meta.env.TURNSTILE_SITE_KEY;
 ---
 
-<dialog class="modal" id="project-modal" aria-labelledby="project-modal-title" data-submit-label="Agregar tu proyecto">
+<dialog class="modal" id="project-modal" aria-labelledby="project-modal-title" data-mode={editing ? "edit" : "create"} data-submit-label={copy.submit}>
   <form class="modal-card">
     <!-- Honeypot: humans never see it; bots fill it and get a fake success. -->
     <input class="honeypot" type="text" name="contact_email" tabindex="-1" autocomplete="off" aria-hidden="true" hidden />
     <!-- Server render time (ms): fills faster than the server minimum are bots. -->
     <input type="hidden" name="submitted_at" value={Date.now()} />
+    <input type="hidden" name="mode" value={editing ? "edit" : "create"} />
     <div data-form-view>
     <header class="modal-header">
       <div class="modal-titles">
-        <h2 class="modal-title" id="project-modal-title">Agrega tu proyecto</h2>
-        <p class="modal-sub">Súmalo al directorio de builders de Venezuela.</p>
+        <h2 class="modal-title" id="project-modal-title">{copy.title}</h2>
+        <p class="modal-sub">{copy.sub}</p>
       </div>
       <button class="modal-close" type="button" data-close-modal aria-label="Cerrar">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 19H5V17H7V19ZM19 19H17V17H19V19ZM9 15V17H7V15H9ZM17 17H15V15H17V17ZM11 15H9V13H11V15ZM15 15H13V13H15V15ZM13 13H11V11H13V13ZM11 11H9V9H11V11ZM15 11H13V9H15V11ZM9 9H7V7H9V9ZM17 9H15V7H17V9ZM7 7H5V5H7V7ZM19 7H17V5H19V7Z" /></svg>
@@ -30,36 +67,45 @@ const TURNSTILE_SITE_KEY = import.meta.env.TURNSTILE_SITE_KEY;
     <div class="modal-body">
       <label class="field" data-field="nombre">
         <span class="field-label">Nombre del proyecto</span>
-        <input class="field-input" type="text" name="nombre" placeholder="Ej. Pana Pay" autocomplete="off" required maxlength="80" aria-describedby="project-form-status" />
+        <input class="field-input" type="text" name="nombre" placeholder="Ej. Pana Pay" autocomplete="off" required maxlength="80" value={editing ? project.title : undefined} aria-describedby="project-form-status" />
         <span class="field-error" data-field-error hidden></span>
       </label>
       <label class="field" data-field="website">
         <span class="field-label">Website URL</span>
-        <input class="field-input" type="text" name="website" placeholder="miproyecto.com" autocomplete="off" required inputmode="url" aria-describedby="project-form-status" />
+        <input class="field-input" type="text" name="website" placeholder="miproyecto.com" autocomplete="off" required inputmode="url" value={editing ? project.href : undefined} readonly={editing} aria-describedby="project-form-status" />
+        {editing && <span class="field-hint">El sitio web identifica tu proyecto y no se puede cambiar aquí. Escríbenos si cambiaste de dominio.</span>}
         <span class="field-error" data-field-error hidden></span>
       </label>
       <label class="field" data-field="descripcion">
         <span class="field-label">Descripcion corta</span>
         <div class="field-textarea-box">
-          <textarea class="field-textarea" name="descripcion" rows="2" minlength="10" maxlength="140" placeholder="Cuéntanos del proyecto: debe ser directo y fácil de entender" required aria-describedby="project-form-status"></textarea>
-          <span class="field-counter" data-counter>0/140</span>
+          <textarea class="field-textarea" name="descripcion" rows="2" minlength="10" maxlength="140" placeholder="Cuéntanos del proyecto: debe ser directo y fácil de entender" required aria-describedby="project-form-status">{description}</textarea>
+          <span class="field-counter" data-counter>{description.length}/140</span>
         </div>
         <span class="field-error" data-field-error hidden></span>
       </label>
       <label class="field" data-field="fundadores">
         <span class="field-label">Fundadores</span>
-        <input class="field-input field-input--sm" type="text" name="fundadores" placeholder="Ej. Luis Fernández, Ana Rodríguez" autocomplete="off" required maxlength="160" aria-describedby="project-form-status" />
+        <input class="field-input field-input--sm" type="text" name="fundadores" placeholder="Ej. Luis Fernández, Ana Rodríguez" autocomplete="off" required maxlength="160" value={editing ? project.author : undefined} aria-describedby="project-form-status" />
         <span class="field-error" data-field-error hidden></span>
       </label>
+      {editing && (
+        <label class="field" data-field="contacto">
+          <span class="field-label">Tu contacto</span>
+          <input class="field-input field-input--sm" type="text" name="contacto" placeholder="Email o @usuario" autocomplete="email" required maxlength="120" aria-describedby="project-form-status" />
+          <span class="field-hint">Solo lo ve el equipo, para confirmar que eres parte del proyecto.</span>
+          <span class="field-error" data-field-error hidden></span>
+        </label>
+      )}
       <div class="field" data-field="logo">
-        <span class="field-label">Logo (opcional)</span>
+        <span class="field-label">{editing ? "Nuevo logo (opcional)" : "Logo (opcional)"}</span>
         <label class="logo-upload" data-logo-drop>
           <span class="logo-upload-icon" aria-hidden="true">
             <img src="/icon-upload.svg" width="20" height="20" alt="" />
           </span>
           <span class="logo-upload-text">
             <span class="logo-upload-title" data-logo-title>Subir logo</span>
-            <span class="logo-upload-hint">Opcional · PNG, JPG o WebP · máx. 1 MB · ideal cuadrado. Se muestra sobre fondo claro, como en la vista previa.</span>
+            <span class="logo-upload-hint">{copy.logoHint}</span>
           </span>
           <img class="logo-upload-thumb logo-tile" data-logo-thumb src="/icon-upload.svg" alt="" hidden />
           <input class="logo-upload-input" type="file" name="logo" accept="image/png,image/jpeg,image/webp" hidden />
@@ -69,12 +115,12 @@ const TURNSTILE_SITE_KEY = import.meta.env.TURNSTILE_SITE_KEY;
       <div class="field" data-field="categorias">
         <div class="field-label-row">
           <span class="field-label">Categorias</span>
-          <span class="field-count" data-cat-count>0 / {MAX_CATEGORIES} SELECCIONADAS</span>
+          <span class="field-count" data-cat-count>{selected.size} / {MAX_CATEGORIES} SELECCIONADAS</span>
         </div>
         <div class="cat-list">
           {CATEGORIES.map((cat) => (
             <label class="cat-row">
-              <input class="cat-checkbox" type="checkbox" name="categorias" value={cat} />
+              <input class="cat-checkbox" type="checkbox" name="categorias" value={cat} checked={selected.has(cat)} />
               <span class="cat-box" aria-hidden="true">
                 <svg class="cat-check" viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5.2 4.3 8.5 11 1.5" /></svg>
               </span>
@@ -101,20 +147,20 @@ const TURNSTILE_SITE_KEY = import.meta.env.TURNSTILE_SITE_KEY;
     </div>
     <footer class="modal-footer">
       <button class="modal-cancel" type="button" data-close-modal>Cancelar</button>
-      <button class="modal-submit" type="submit">Agregar tu proyecto</button>
+      <button class="modal-submit" type="submit">{copy.submit}</button>
     </footer>
     </div>
     <section class="modal-success" data-success-view hidden aria-labelledby="modal-success-title">
       <img class="modal-success-check" src="/check-thanks.svg" width="74" height="40" alt="" />
       <div class="modal-success-copy">
         <h2 id="modal-success-title" tabindex="-1">
-          <span>Tu proyecto ya está</span>
-          <span>en revisión</span>
+          <span>{copy.successA}</span>
+          <span>{copy.successB}</span>
         </h2>
-        <p>Gracias por sumarte.</p>
+        <p>{copy.successP}</p>
       </div>
       <div class="modal-success-actions">
-        <button class="modal-success-secondary" type="button" data-submit-another>Agregar otro proyecto</button>
+        {!editing && <button class="modal-success-secondary" type="button" data-submit-another>Agregar otro proyecto</button>}
         <button class="modal-success-done" type="button" data-close-modal>Listo</button>
       </div>
     </section>
@@ -178,7 +224,7 @@ const TURNSTILE_SITE_KEY = import.meta.env.TURNSTILE_SITE_KEY;
       fieldInput(field)?.setAttribute("aria-invalid", "false");
     };
     // map a validation/error field name to the closest form field
-    const FIELD_NAMES = new Set(["nombre", "website", "descripcion", "fundadores", "logo", "categorias", "captcha"]);
+    const FIELD_NAMES = new Set(["nombre", "website", "descripcion", "fundadores", "contacto", "logo", "categorias", "captcha"]);
 
     // short-description character counter
     const ta = dialog.querySelector<HTMLTextAreaElement>('textarea[name="descripcion"]');

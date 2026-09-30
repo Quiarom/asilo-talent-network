@@ -3,10 +3,12 @@ import {
   buildRow,
   CATEGORIES,
   findDuplicateWebsite,
+  findLatestApprovedRevision,
   formatFecha,
   MAX_CATEGORIES,
   normalizeWebsiteKey,
   normalizeWebsiteUrl,
+  validateContact,
   validateSubmission,
   websiteColumnIndex,
 } from "../src/lib/projects-submit";
@@ -264,5 +266,40 @@ describe("CATEGORIES", () => {
     expect(
       validateSubmission({ ...validInput, categorias: ["Legaltech", "Proptech"] }).ok,
     ).toBe(true);
+  });
+});
+
+describe("edit requests", () => {
+  const header = ["Fecha", "Nombre del proyecto", "Sitio web", "Descripción corta", "Fundadores", "Categorías", "Aprobado", "ID del logo", "ID de revisión", "Notas adicionales"];
+  const row = (site: string, approved: string, logo: string, rev: string) =>
+    ["", "Pana", site, "desc", "Ana", "Fintech", approved, logo, rev, ""];
+
+  it("finds the latest APPROVED revision of a website", () => {
+    const values = [
+      header,
+      row("https://panapay.com", "SI", "logo-1", "rev-1"),
+      row("https://www.panapay.com/", "SI", "logo-2", "rev-2"),
+      row("https://panapay.com", "PENDIENTE", "logo-3", "rev-3"),
+      row("https://otro.com", "SI", "logo-x", "rev-x"),
+    ];
+    expect(findLatestApprovedRevision(values, "panapay.com")).toEqual({ logoId: "logo-2", revisionId: "rev-2" });
+  });
+
+  it("returns null for unpublished or unknown websites", () => {
+    const values = [header, row("https://panapay.com", "PENDIENTE", "", "rev-1")];
+    expect(findLatestApprovedRevision(values, "panapay.com")).toBeNull();
+    expect(findLatestApprovedRevision(values, "nuevo.com")).toBeNull();
+    expect(findLatestApprovedRevision([], "panapay.com")).toBeNull();
+  });
+
+  it("writes the edit note into Notas adicionales and validates the contact", () => {
+    const cells = buildRow(
+      { nombre: "Pana", website: "https://panapay.com/", descripcion: "Pagos rápidos", fundadores: "Ana", categorias: ["Fintech"] },
+      { revisionId: "rev-new", notes: "Solicitud de edición de rev-2 · Contacto: @ana" },
+    );
+    expect(cells[6]).toBe("PENDIENTE");
+    expect(cells[9]).toBe("Solicitud de edición de rev-2 · Contacto: @ana");
+    expect(validateContact("  @ana  ")).toBe("@ana");
+    expect(validateContact("a")).toBeNull();
   });
 });

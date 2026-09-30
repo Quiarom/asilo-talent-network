@@ -38,9 +38,9 @@ describe("ProjectDirectory", () => {
     );
 
     expect(component).toContain('class="modal-success"');
-    expect(component).toContain("<span>Tu proyecto ya está</span>");
-    expect(component).toContain("<span>en revisión</span>");
-    expect(component).toContain("Gracias por sumarte.");
+    expect(component).toContain('successA: "Tu proyecto ya está"');
+    expect(component).toContain('successB: "en revisión"');
+    expect(component).toContain('successP: "Gracias por sumarte."');
     expect(component).toContain('src="/check-thanks.svg"');
     expect(component).not.toContain("Revisaremos el proyecto");
     expect(component).toContain("Agregar otro proyecto");
@@ -48,7 +48,7 @@ describe("ProjectDirectory", () => {
     expect(component).toContain('data-submit-another');
     expect(component).toContain("playConfetti();");
     expect(component).toContain('layer.className = "modal-confetti"');
-    expect(component).toContain("Logo (opcional)");
+    expect(component).toContain('"Logo (opcional)"');
   });
 
   it("only closes from a genuine backdrop click, not a text-selection gesture", () => {

@@ -1,11 +1,12 @@
 ---
 /**
- * Project detail page: the home for likes and comments.
+ * Project detail page: the home for likes, comments and edit requests.
  * Only the trailing id in the slug resolves the project (see
  * project-identity.ts); any other spelling 301s to the canonical slug.
  */
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import LikeButton from "../../components/LikeButton.astro";
+import ProjectFormModal from "../../components/ProjectFormModal.astro";
 import { engagementEnabled, loadProjectPage } from "../../lib/directory";
 import { COMMENT_AUTHOR_MAX, COMMENT_BODY_MAX } from "../../lib/engagement/comments";
 import { idFromSlug } from "../../lib/project-identity";
@@ -81,6 +82,12 @@ const TURNSTILE_SITE_KEY = import.meta.env.TURNSTILE_SITE_KEY;
             )}
           </div>
 
+          <p class="pd-owner">
+            ¿Es tu proyecto?{" "}
+            <button class="pd-owner-link" type="button" data-open-modal>Solicita cambios</button>{" "}
+            (logo, descripción, fundadores o categorías).
+          </p>
+
           {engagement && project.id && (
             <section class="pd-comments" aria-labelledby="pd-comments-title">
               <h2 id="pd-comments-title" class="pd-comments-title">
@@ -138,6 +145,7 @@ const TURNSTILE_SITE_KEY = import.meta.env.TURNSTILE_SITE_KEY;
     </div>
   </section>
 
+  {project && <ProjectFormModal mode="edit" project={project} />}
 </BaseLayout>
 
 <script>
