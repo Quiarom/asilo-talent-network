@@ -84,4 +84,20 @@ describe("ProjectDirectory", () => {
     expect(component).toContain("window.setInterval(refreshProjects, 30_000)");
     expect(component).toContain("document.visibilityState !== \"visible\"");
   });
+
+  it("puts uploaded logos on the logo tile and keeps category icons otherwise", async () => {
+    const base = { description: "", author: "", tags: ["Proptech"] };
+    const container = await AstroContainer.create();
+    const html = await container.renderToString(ProjectDirectory, {
+      props: {
+        projects: [
+          { ...base, href: "https://con-logo.example", title: "Con logo", logoUrl: "https://cdn.example/logo.png" },
+          { ...base, href: "https://sin-logo.example", title: "Sin logo" },
+        ],
+      },
+    });
+
+    expect(html).toMatch(/<div class="prj-thumb"[^>]*>\s*<img class="prj-logo" src="https:\/\/cdn\.example\/logo\.png"/);
+    expect(html).toContain('src="/icons/pixelarticons/home.svg"');
+  });
 });
