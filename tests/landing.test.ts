@@ -30,7 +30,7 @@ describe("landing de servicios", () => {
 
   it("renders the sections in order with their anchors", async () => {
     const html = await render();
-    const ids = ["inicio", "servicios", "proceso", "trabajo", "testimonios", "contacto"];
+    const ids = ["inicio", "servicios", "testimonios", "proceso", "trabajo", "contacto"];
     const positions = ids.map((id) => html.indexOf(`id="${id}"`));
 
     expect(positions.every((p) => p >= 0)).toBe(true);
