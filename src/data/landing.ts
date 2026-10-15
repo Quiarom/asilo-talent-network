@@ -19,7 +19,6 @@ export const navLinks: NavLink[] = [
   { label: "Servicios", href: "#servicios" },
   { label: "Proceso", href: "#proceso" },
   { label: "Trabajo", href: "#trabajo" },
-  { label: "Nosotros", href: "#nosotros" },
 ];
 
 export interface ImageAsset {
@@ -165,15 +164,6 @@ export const testimonials = {
       avatar: `/placeholders/testimonial-${n}.webp`,
     }),
   ),
-};
-
-export const about = {
-  title: "Nacimos como comunidad. Seguimos pensando como una.",
-  body: [
-    "En enero de 2021 abrimos un canal de Telegram para hablar de privacidad y tecnología sin tecnicismos.",
-    "Hoy llevamos ese mismo propósito a los productos que diseñamos: que la tecnología se entienda.",
-  ],
-  signature: "— Equipo Asilo Digital",
 };
 
 export const contact = {

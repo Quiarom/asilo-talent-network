@@ -30,7 +30,7 @@ describe("landing de servicios", () => {
 
   it("renders the sections in order with their anchors", async () => {
     const html = await render();
-    const ids = ["inicio", "servicios", "proceso", "trabajo", "testimonios", "nosotros", "contacto"];
+    const ids = ["inicio", "servicios", "proceso", "trabajo", "testimonios", "contacto"];
     const positions = ids.map((id) => html.indexOf(`id="${id}"`));
 
     expect(positions.every((p) => p >= 0)).toBe(true);
@@ -40,7 +40,6 @@ describe("landing de servicios", () => {
       "Tres pasos. Cero adivinanzas.",
       "Trabajo reciente, diseñado para que se use.",
       "Lo que dicen los equipos con los que trabajamos.",
-      "Nacimos como comunidad. Seguimos pensando como una.",
       "Hagamos que tu app se entienda.",
     ]) {
       expect(html).toContain(headline);
@@ -81,7 +80,8 @@ describe("landing de servicios", () => {
       expect(html).toContain(item.problem);
     }
     expect(html).toContain("Ver todos los casos");
-    expect(html).toContain("— Equipo Asilo Digital");
+    expect(html).not.toContain('id="nosotros"');
+    expect(html).not.toContain('href="#nosotros"');
     expect(html.match(/<blockquote\b/g)).toHaveLength(testimonials.items.length);
     expect(html).not.toContain("l-member");
   });
