@@ -510,6 +510,70 @@ html:has(body.landing) {
   .l-testimonials { grid-template-columns: repeat(3, 1fr); }
 }
 
+/* ── Preguntas frecuentes ────────────────────────────────────────────── */
+
+/* Móvil: título, preguntas y tarjeta de contacto al final.
+   Desktop: título y tarjeta a la izquierda (fija al hacer scroll), preguntas a la derecha. */
+.l-faq {
+  display: grid; gap: var(--spacing-32);
+  grid-template-areas: "head" "list" "card";
+}
+.l-faq-head { grid-area: head; }
+.l-faq-list { grid-area: list; display: flex; flex-direction: column; gap: var(--spacing-12); min-width: 0; }
+.l-faq-card { grid-area: card; }
+
+.l-faq-item summary {
+  display: flex; align-items: center; gap: var(--spacing-16);
+  min-height: 64px; padding: var(--spacing-16) var(--spacing-20);
+  cursor: pointer; list-style: none;
+}
+.l-faq-item summary::-webkit-details-marker { display: none; }
+.l-faq-item summary:focus-visible { outline-offset: 2px; }
+.l-faq-q { font-size: 17px; font-weight: 500; line-height: 1.35; letter-spacing: -0.01em; }
+
+.l-faq-icon {
+  position: relative; flex: none; width: 28px; height: 28px;
+  border-radius: var(--radius-md); box-shadow: var(--ring-ghost);
+  background: var(--color-paper-white);
+  transition: background-color 160ms ease, box-shadow 160ms ease;
+}
+.l-faq-icon::before, .l-faq-icon::after {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: 12px; height: 1.5px; background: var(--color-obsidian);
+  transform: translate(-50%, -50%);
+  transition: transform 220ms var(--ease-out);
+}
+.l-faq-icon::after { transform: translate(-50%, -50%) rotate(90deg); }
+.l-faq-item[open] .l-faq-icon::after { transform: translate(-50%, -50%) rotate(0deg); }
+.l-faq-item summary:hover .l-faq-icon { box-shadow: 0 0 0 1px var(--color-ash); }
+
+.l-faq-a {
+  max-width: 62ch;
+  padding: 0 var(--spacing-20) var(--spacing-20) calc(var(--spacing-20) + 28px + var(--spacing-16));
+  font-size: 16px; color: var(--color-charcoal); text-wrap: pretty;
+}
+.l-faq-item[open] .l-faq-a { animation: l-rise 280ms var(--ease-out) both; }
+
+.l-faq-card { display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-20); padding: var(--spacing-24); }
+.l-faq-card img { width: 48px; height: 48px; border-radius: var(--radius-md); object-fit: cover; }
+.l-faq-card-copy { display: flex; flex-direction: column; gap: var(--spacing-8); }
+.l-faq-card h3 { font-size: 24px; font-weight: 450; line-height: 1.1; letter-spacing: -0.04em; }
+.l-faq-card-copy p { color: var(--color-charcoal); }
+.l-faq-mail { font-size: 14px; color: var(--color-stone); }
+.l-faq-mail a { color: var(--color-obsidian); text-decoration-color: var(--color-ash); text-underline-offset: 4px; }
+.l-faq-mail a:hover { text-decoration-color: currentColor; }
+
+@media (min-width: 1024px) {
+  .l-faq {
+    grid-template-columns: 5fr 7fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas: "head list" "card list";
+    column-gap: var(--spacing-44);
+    row-gap: var(--spacing-32);
+  }
+  .l-faq-card { align-self: start; position: sticky; top: calc(var(--nav-h) + var(--spacing-24)); }
+}
+
 /* ── 6. CTA final ─────────────────────────────────────────────────────── */
 
 .l-contact {

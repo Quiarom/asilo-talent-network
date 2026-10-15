@@ -166,6 +166,65 @@ export const testimonials = {
   ),
 };
 
+export interface FaqItem {
+  question: string;
+  answer: string;
+}
+
+export const faq = {
+  eyebrow: "¿Aún tienes dudas?",
+  title: "Preguntas frecuentes.",
+  card: {
+    title: "¿No encuentras tu respuesta?",
+    body: "Lo hablamos en una llamada.",
+    emailLabel: "O escríbenos a",
+    // TODO: reemplazar con la foto de quien atiende las llamadas.
+    avatar: "/placeholders/faq-contact.webp",
+  },
+  // TODO: confirmar las respuestas con el equipo antes de publicar.
+  items: [
+    {
+      question: "¿Con quién trabajan mejor?",
+      answer:
+        "Con founders y PMs de startups latinoamericanas que ya tienen una app en manos de usuarios, o están por lanzarla, y sienten que no se entiende como debería.",
+    },
+    {
+      question: "¿En qué nos pueden ayudar exactamente?",
+      answer:
+        "En tres cosas: diagnosticar la UX de tu app, rediseñarla con identidad propia y llevar ese diseño a producción. Puedes contratar una sola o las tres.",
+    },
+    {
+      question: "¿Son una agencia de diseño o de desarrollo?",
+      answer:
+        "Somos un estudio de diseño de producto. También implementamos: construimos sitios en Framer o Webflow, hacemos front-end y revisamos que lo construido respete el diseño.",
+    },
+    {
+      question: "¿Pueden ayudarnos con un producto desde cero?",
+      answer:
+        "Sí. Empezamos por entender el problema que resuelve tu producto y a quién se lo resuelve, y desde ahí diseñamos los primeros flujos y la identidad.",
+    },
+    {
+      question: "¿Cuánto cuesta trabajar con ustedes?",
+      answer:
+        "Depende del alcance. Después de la llamada de diagnóstico te enviamos una propuesta con entregables, tiempos y precio, para que decidas con todo sobre la mesa.",
+    },
+    {
+      question: "¿Qué tan rápido pueden empezar?",
+      answer: "Depende de nuestra agenda en ese momento. En la llamada te decimos la fecha de inicio más cercana.",
+    },
+    {
+      question: "¿Cómo trabajamos día a día?",
+      answer:
+        "Con un canal de comunicación compartido y revisiones periódicas. Ves el avance desde el primer día y no esperas a una gran entrega final para opinar.",
+    },
+    {
+      question: "¿Pueden trabajar con nuestro equipo interno?",
+      answer:
+        "Sí. Trabajamos junto a tu equipo de producto y desarrollo, y les dejamos la documentación y el design system para que sigan sin nosotros.",
+    },
+  ] satisfies FaqItem[],
+};
+
 export const contact = {
   title: "Hagamos que tu app se entienda.",
   emailLabel: "o escríbenos a",

@@ -1,0 +1,35 @@
+---
+import { CONTACT_EMAIL, CTA_HREF, CTA_LABEL, faq } from "../../data/landing";
+---
+<section class="l-section" id="preguntas" aria-labelledby="preguntas-title">
+  <div class="l-container l-faq">
+    <div class="l-faq-head" data-reveal>
+      <span class="l-eyebrow">{faq.eyebrow}</span>
+      <h2 class="l-heading" id="preguntas-title">{faq.title}</h2>
+    </div>
+
+    <div class="l-faq-list" data-reveal style="--reveal-i: 1">
+      {faq.items.map((item) => (
+        <details class="l-card l-faq-item">
+          <summary>
+            <span class="l-faq-icon" aria-hidden="true"></span>
+            <span class="l-faq-q">{item.question}</span>
+          </summary>
+          <p class="l-faq-a">{item.answer}</p>
+        </details>
+      ))}
+    </div>
+
+    <aside class="l-card l-faq-card" aria-labelledby="preguntas-card-title" data-reveal style="--reveal-i: 2">
+      <img src={faq.card.avatar} alt="" width="48" height="48" loading="lazy" decoding="async" />
+      <div class="l-faq-card-copy">
+        <h3 id="preguntas-card-title">{faq.card.title}</h3>
+        <p>{faq.card.body}</p>
+      </div>
+      <a class="l-btn l-btn--primary" href={CTA_HREF}>{CTA_LABEL}</a>
+      <p class="l-faq-mail">
+        {faq.card.emailLabel} <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+      </p>
+    </aside>
+  </div>
+</section>

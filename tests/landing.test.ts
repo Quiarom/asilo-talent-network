@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { describe, expect, it } from "vitest";
 import ServiciosPage from "../src/pages/servicios.astro";
-import { hero, processSteps, services, testimonials, workCases } from "../src/data/landing";
+import { faq, hero, processSteps, services, testimonials, workCases } from "../src/data/landing";
 
 const SITE = "https://builders.asilodigital.com";
 
@@ -30,7 +30,7 @@ describe("landing de servicios", () => {
 
   it("renders the sections in order with their anchors", async () => {
     const html = await render();
-    const ids = ["inicio", "servicios", "testimonios", "proceso", "trabajo", "contacto"];
+    const ids = ["inicio", "servicios", "testimonios", "proceso", "trabajo", "preguntas", "contacto"];
     const positions = ids.map((id) => html.indexOf(`id="${id}"`));
 
     expect(positions.every((p) => p >= 0)).toBe(true);
@@ -40,6 +40,7 @@ describe("landing de servicios", () => {
       "Tres pasos. Cero adivinanzas.",
       "Trabajo reciente, diseñado para que se use.",
       "Lo que dicen los equipos con los que trabajamos.",
+      "Preguntas frecuentes.",
       "Hagamos que tu app se entienda.",
     ]) {
       expect(html).toContain(headline);
@@ -50,15 +51,16 @@ describe("landing de servicios", () => {
     const html = await render();
     const ctas = anchorsWithText(html, "Agenda un diagnóstico");
 
-    // Nav, menú móvil, hero y CTA final.
-    expect(ctas.length).toBe(4);
+    // Nav, menú móvil, hero, tarjeta de la FAQ y CTA final.
+    expect(ctas.length).toBe(5);
     expect(new Set(ctas)).toEqual(new Set(["#contacto"]));
     expect(anchorsWithText(html, "Ver servicios")).toEqual(["#servicios"]);
   });
 
   it("renders the services as an exclusive accordion with the first item open", async () => {
     const html = await render();
-    const details = html.match(/<details\b[^>]*>/g) ?? [];
+    const section = html.slice(html.indexOf('id="servicios"'), html.indexOf('id="testimonios"'));
+    const details = section.match(/<details\b[^>]*>/g) ?? [];
 
     expect(details).toHaveLength(services.length);
     expect(details.every((tag) => tag.includes('name="servicios"'))).toBe(true);
@@ -84,6 +86,23 @@ describe("landing de servicios", () => {
     expect(html).not.toContain('href="#nosotros"');
     expect(html.match(/<blockquote\b/g)).toHaveLength(testimonials.items.length);
     expect(html).not.toContain("l-member");
+  });
+
+  it("renders the FAQ as independent accordion items next to a contact card", async () => {
+    const html = await render();
+    const section = html.slice(html.indexOf('id="preguntas"'), html.indexOf('id="contacto"'));
+    const items = section.match(/<details\b[^>]*>/g) ?? [];
+
+    expect(items).toHaveLength(faq.items.length);
+    // Las preguntas se abren de forma independiente y empiezan cerradas.
+    expect(items.some((tag) => /\bname=|\bopen\b/.test(tag))).toBe(false);
+    for (const item of faq.items) {
+      expect(section).toContain(item.question);
+      expect(section).toContain(item.answer);
+    }
+    expect(section).toContain("¿No encuentras tu respuesta?");
+    expect(anchorsWithText(section, "Agenda un diagnóstico")).toEqual(["#contacto"]);
+    expect(section).toContain('href="mailto:hola@asilodigital.com"');
   });
 
   it("keeps the footer links and contact email", async () => {
@@ -118,6 +137,7 @@ describe("landing de servicios", () => {
       ...processSteps.map((step) => step.image.src),
       ...workCases.map((item) => item.image.src),
       ...testimonials.items.map((item) => item.avatar),
+      faq.card.avatar,
       "/og-servicios.png",
       "/logo-asilo.svg",
       "/fonts/geist-sans.woff2",
