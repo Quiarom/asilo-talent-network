@@ -489,6 +489,27 @@ html:has(body.landing) {
   .l-case--featured .l-media { aspect-ratio: 16 / 9; }
 }
 
+/* ── Testimonios ──────────────────────────────────────────────────────── */
+
+.l-testimonials { display: grid; gap: var(--spacing-16); }
+.l-testimonials > li { display: flex; }
+.l-quote {
+  display: flex; flex-direction: column; justify-content: space-between; gap: var(--spacing-32);
+  width: 100%; padding: var(--spacing-24);
+}
+.l-quote blockquote { margin: 0; }
+.l-quote blockquote p { font-size: 18px; line-height: 1.5; letter-spacing: -0.01em; color: var(--color-obsidian); text-wrap: pretty; }
+.l-quote blockquote p::before { content: "“"; }
+.l-quote blockquote p::after { content: "”"; }
+.l-quote figcaption { display: flex; align-items: center; gap: var(--spacing-12); }
+.l-quote figcaption img { width: 40px; height: 40px; border-radius: var(--radius-full); object-fit: cover; }
+.l-quote figcaption > span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.l-quote strong { font-size: 15px; font-weight: 500; }
+
+@media (min-width: 900px) {
+  .l-testimonials { grid-template-columns: repeat(3, 1fr); }
+}
+
 /* ── 6. Nosotros ──────────────────────────────────────────────────────── */
 
 .l-about-grid { display: grid; gap: var(--spacing-40); }
@@ -497,20 +518,8 @@ html:has(body.landing) {
 .l-letter p:first-of-type { color: var(--color-obsidian); }
 .l-signature { margin-top: var(--spacing-8); font-family: var(--font-geist-mono); font-size: 13px; letter-spacing: 0.02em; color: var(--color-obsidian); }
 
-.l-team { margin-top: var(--spacing-40); display: grid; gap: var(--spacing-12); }
-.l-member { padding: var(--spacing-8); }
-.l-member .l-media { aspect-ratio: 4 / 5; }
-.l-member figcaption { display: flex; flex-direction: column; gap: 2px; padding: var(--spacing-12) var(--spacing-4) var(--spacing-4); }
-.l-member strong { font-size: 15px; font-weight: 500; }
-@media (max-width: 767px) {
-  /* En móvil cada integrante es una fila: foto a la izquierda, nombre y rol a la derecha. */
-  .l-member { display: grid; grid-template-columns: 88px 1fr; align-items: center; gap: var(--spacing-12); }
-  .l-member figcaption { padding: 0; }
-}
-
 @media (min-width: 768px) {
   .l-letter { padding: var(--spacing-40); }
-  .l-team { grid-template-columns: repeat(3, 1fr); }
 }
 @media (min-width: 1100px) {
   .l-about-grid { grid-template-columns: 1.1fr 1fr; align-items: start; }

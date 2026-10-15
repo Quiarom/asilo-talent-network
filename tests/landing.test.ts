@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { describe, expect, it } from "vitest";
 import ServiciosPage from "../src/pages/servicios.astro";
-import { about, hero, processSteps, services, workCases } from "../src/data/landing";
+import { hero, processSteps, services, testimonials, workCases } from "../src/data/landing";
 
 const SITE = "https://builders.asilodigital.com";
 
@@ -28,9 +28,9 @@ describe("landing de servicios", () => {
     expect(html).toContain("Diagnosticamos tu UX, rediseñamos tu producto con identidad propia y lo llevamos a producción.");
   });
 
-  it("renders the six sections in order with their anchors", async () => {
+  it("renders the sections in order with their anchors", async () => {
     const html = await render();
-    const ids = ["inicio", "servicios", "proceso", "trabajo", "nosotros", "contacto"];
+    const ids = ["inicio", "servicios", "proceso", "trabajo", "testimonios", "nosotros", "contacto"];
     const positions = ids.map((id) => html.indexOf(`id="${id}"`));
 
     expect(positions.every((p) => p >= 0)).toBe(true);
@@ -39,6 +39,7 @@ describe("landing de servicios", () => {
       "Tres formas de trabajar juntos.",
       "Tres pasos. Cero adivinanzas.",
       "Trabajo reciente, diseñado para que se use.",
+      "Lo que dicen los equipos con los que trabajamos.",
       "Nacimos como comunidad. Seguimos pensando como una.",
       "Hagamos que tu app se entienda.",
     ]) {
@@ -69,7 +70,7 @@ describe("landing de servicios", () => {
     }
   });
 
-  it("renders the process steps, work cases, and team cards", async () => {
+  it("renders the process steps, work cases, and testimonials without team cards", async () => {
     const html = await render();
 
     expect(processSteps).toHaveLength(3);
@@ -81,7 +82,8 @@ describe("landing de servicios", () => {
     }
     expect(html).toContain("Ver todos los casos");
     expect(html).toContain("— Equipo Asilo Digital");
-    expect(html.match(/class="l-card l-member"/g)).toHaveLength(3);
+    expect(html.match(/<blockquote\b/g)).toHaveLength(testimonials.items.length);
+    expect(html).not.toContain("l-member");
   });
 
   it("keeps the footer links and contact email", async () => {
@@ -115,7 +117,7 @@ describe("landing de servicios", () => {
       ...services.map((service) => service.image.src),
       ...processSteps.map((step) => step.image.src),
       ...workCases.map((item) => item.image.src),
-      ...about.team.map((member) => member.photo),
+      ...testimonials.items.map((item) => item.avatar),
       "/og-servicios.png",
       "/logo-asilo.svg",
       "/fonts/geist-sans.woff2",

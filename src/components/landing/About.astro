@@ -14,22 +14,4 @@ import { about } from "../../data/landing";
       <p class="l-signature">{about.signature}</p>
     </div>
   </div>
-
-  <div class="l-container">
-    <ul class="l-team" aria-label="Equipo">
-      {about.team.map((member, i) => (
-        <li data-reveal style={`--reveal-i: ${i}`}>
-          <figure class="l-card l-member">
-            <div class="l-media">
-              <img src={member.photo} alt={`Foto de ${member.name}`} width="800" height="1000" loading="lazy" decoding="async" />
-            </div>
-            <figcaption>
-              <strong>{member.name}</strong>
-              <span class="l-tag">{member.role}</span>
-            </figcaption>
-          </figure>
-        </li>
-      ))}
-    </ul>
-  </div>
 </section>

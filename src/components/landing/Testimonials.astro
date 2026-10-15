@@ -1,0 +1,32 @@
+---
+import { testimonials } from "../../data/landing";
+---
+<section class="l-section" id="testimonios" aria-labelledby="testimonios-title">
+  <div class="l-container">
+    <div class="l-section-head" data-reveal>
+      <div>
+        <span class="l-eyebrow">Testimonios</span>
+        <h2 class="l-heading" id="testimonios-title">{testimonials.title}</h2>
+      </div>
+    </div>
+
+    <ul class="l-testimonials">
+      {testimonials.items.map((item, i) => (
+        <li data-reveal style={`--reveal-i: ${i}`}>
+          <figure class="l-card l-quote">
+            <blockquote>
+              <p>{item.quote}</p>
+            </blockquote>
+            <figcaption>
+              <img src={item.avatar} alt="" width="40" height="40" loading="lazy" decoding="async" />
+              <span>
+                <strong>{item.name}</strong>
+                <span class="l-tag">{item.role}</span>
+              </span>
+            </figcaption>
+          </figure>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

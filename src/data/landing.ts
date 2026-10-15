@@ -146,11 +146,26 @@ export const workCases: WorkCase[] = [
 // TODO: apuntar a la página con todos los casos cuando exista.
 export const allCasesHref = "#trabajo";
 
-export interface TeamMember {
+export interface Testimonial {
+  quote: string;
   name: string;
   role: string;
-  photo: string;
+  avatar: string;
 }
+
+export const testimonials = {
+  title: "Lo que dicen los equipos con los que trabajamos.",
+  // TODO: reemplazar con testimonios reales (con permiso): cita, nombre, cargo · empresa y foto.
+  items: [1, 2, 3].map(
+    (n): Testimonial => ({
+      quote:
+        "Aquí va el testimonio de un cliente: qué problema tenía, qué cambió después de trabajar con Asilo y un resultado concreto.",
+      name: "Nombre Apellido",
+      role: "Cargo · Empresa",
+      avatar: `/placeholders/testimonial-${n}.webp`,
+    }),
+  ),
+};
 
 export const about = {
   title: "Nacimos como comunidad. Seguimos pensando como una.",
@@ -159,12 +174,6 @@ export const about = {
     "Hoy llevamos ese mismo propósito a los productos que diseñamos: que la tecnología se entienda.",
   ],
   signature: "— Equipo Asilo Digital",
-  // TODO: reemplazar con el equipo real (foto, nombre y rol).
-  team: [
-    { name: "Nombre Apellido", role: "Diseño de producto", photo: "/placeholders/team-1.webp" },
-    { name: "Nombre Apellido", role: "Identidad de marca", photo: "/placeholders/team-2.webp" },
-    { name: "Nombre Apellido", role: "Front-end", photo: "/placeholders/team-3.webp" },
-  ] satisfies TeamMember[],
 };
 
 export const contact = {
