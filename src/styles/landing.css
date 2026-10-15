@@ -253,13 +253,7 @@ html:has(body.landing) {
   text-decoration: none;
   color: var(--color-obsidian);
 }
-.l-logo img { width: 72px; height: auto; }
-.l-logo-sub {
-  font-family: var(--font-geist-mono);
-  font-size: 11px;
-  letter-spacing: 0.071em;
-  text-transform: uppercase;
-}
+.l-logo img { width: auto; height: 24px; }
 
 .l-nav-links { display: none; gap: var(--spacing-24); }
 .l-nav-links a {

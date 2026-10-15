@@ -1,5 +1,5 @@
 ---
-// Marca de Asilo Digital: wordmark pixelado "ASILO" + "Digital" en mono.
+// Logo de Asilo Digital (isotipo + wordmark). Se usa en el header, el menú móvil y el footer.
 interface Props {
   href?: string;
 }
@@ -7,6 +7,5 @@ interface Props {
 const { href = "#inicio" } = Astro.props;
 ---
 <a class="l-logo" href={href} aria-label="Asilo Digital, ir al inicio">
-  <img src="/logo-asilo.svg" alt="" width="72" height="19" />
-  <span class="l-logo-sub" aria-hidden="true">Digital</span>
+  <img src="/logo-asilo-digital.svg" alt="" width="164" height="24" />
 </a>

@@ -139,7 +139,7 @@ describe("landing de servicios", () => {
       ...testimonials.items.map((item) => item.avatar),
       faq.card.avatar,
       "/og-servicios.png",
-      "/logo-asilo.svg",
+      "/logo-asilo-digital.svg",
       "/fonts/geist-sans.woff2",
       "/fonts/geist-mono.woff2",
     ];
