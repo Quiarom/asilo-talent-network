@@ -12,3 +12,19 @@
   font-display: swap;
   src: url("/fonts/ibm-plex-sans.woff2") format("woff2");
 }
+/* Geist (SIL OFL, ver public/fonts/geist-OFL.txt): usada por la landing de servicios. */
+@font-face {
+  font-family: "Geist Sans";
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/geist-sans.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  src: url("/fonts/geist-mono.woff2") format("woff2");
+}

@@ -1,0 +1,12 @@
+---
+// Marca de Asilo Digital: wordmark pixelado "ASILO" + "Digital" en mono.
+interface Props {
+  href?: string;
+}
+
+const { href = "#inicio" } = Astro.props;
+---
+<a class="l-logo" href={href} aria-label="Asilo Digital, ir al inicio">
+  <img src="/logo-asilo.svg" alt="" width="72" height="19" />
+  <span class="l-logo-sub" aria-hidden="true">Digital</span>
+</a>

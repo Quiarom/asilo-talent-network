@@ -1,0 +1,39 @@
+---
+import { processSteps } from "../../data/landing";
+---
+<section class="l-section l-process" id="proceso" aria-labelledby="proceso-title">
+  <div class="l-container">
+    <div class="l-section-head" data-reveal>
+      <div>
+        <span class="l-eyebrow">Proceso</span>
+        <h2 class="l-heading" id="proceso-title">Tres pasos. Cero adivinanzas.</h2>
+      </div>
+    </div>
+
+    {/* Tres columnas en desktop; carrusel deslizable en móvil. */}
+    <div class="l-scroller" id="process-steps" tabindex="0" role="region" aria-label="Pasos del proceso" data-reveal style="--reveal-i: 1">
+      <ol class="l-scroller-list">
+        {processSteps.map((step) => (
+          <li>
+            <article class="l-card l-step">
+              <div class="l-media">
+                <img src={step.image.src} alt={step.image.alt} width="960" height="720" loading="lazy" decoding="async" />
+              </div>
+              <span class="l-tag l-tag--pill">Paso {step.number}</span>
+              <h3>{step.title}</h3>
+              <p>{step.description}</p>
+            </article>
+          </li>
+        ))}
+      </ol>
+    </div>
+    <div class="l-scroller-controls">
+      <button class="l-icon-btn" type="button" data-scroll-prev="process-steps" aria-label="Paso anterior">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" /></svg>
+      </button>
+      <button class="l-icon-btn" type="button" data-scroll-next="process-steps" aria-label="Paso siguiente">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" /></svg>
+      </button>
+    </div>
+  </div>
+</section>

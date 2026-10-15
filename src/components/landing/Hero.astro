@@ -1,0 +1,57 @@
+---
+import { CTA_HREF, CTA_LABEL, hero } from "../../data/landing";
+---
+<section class="l-hero" id="inicio" aria-labelledby="hero-title">
+  <div class="l-container">
+    <div class="l-hero-copy">
+      <h1 class="l-display" id="hero-title" data-reveal>{hero.title}</h1>
+      <p class="l-lead" data-reveal style="--reveal-i: 1">{hero.subtitle}</p>
+      <div class="l-hero-ctas" data-reveal style="--reveal-i: 2">
+        <a class="l-btn l-btn--primary" href={CTA_HREF}>{CTA_LABEL}</a>
+        <a class="l-btn l-btn--ghost" href={hero.secondaryCta.href}>{hero.secondaryCta.label}</a>
+      </div>
+      <div class="l-proof" data-reveal style="--reveal-i: 3">
+        <ul class="l-avatars" aria-hidden="true">
+          {hero.avatars.map((src) => <li><img src={src} alt="" width="32" height="32" loading="eager" /></li>)}
+        </ul>
+        <p>{hero.proof}</p>
+      </div>
+    </div>
+
+    <div class="l-logos">
+      <div class="l-logos-track">
+        <ul aria-label="Clientes">
+          {hero.clientLogos.map((logo) => <li><img src={logo.src} alt={logo.name} width="120" height="24" /></li>)}
+        </ul>
+        {/* Copia para el scroll infinito: oculta a lectores de pantalla. */}
+        <ul aria-hidden="true">
+          {hero.clientLogos.map((logo) => <li><img src={logo.src} alt="" width="120" height="24" /></li>)}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="l-screens" data-reveal="fade">
+    <div class="l-scroller" id="hero-screens" tabindex="0" role="region" aria-label="Pantallas de apps diseñadas">
+      <ul class="l-scroller-list">
+      {hero.screens.map((screen, i) => (
+        <li>
+          <figure class="l-card l-screen">
+            <div class="l-media">
+              <img src={screen.src} alt={screen.alt} width="540" height="1080" loading={i < 3 ? "eager" : "lazy"} decoding="async" />
+            </div>
+          </figure>
+        </li>
+      ))}
+      </ul>
+    </div>
+    <div class="l-container l-scroller-controls">
+      <button class="l-icon-btn" type="button" data-scroll-prev="hero-screens" aria-label="Pantallas anteriores">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" /></svg>
+      </button>
+      <button class="l-icon-btn" type="button" data-scroll-next="hero-screens" aria-label="Pantallas siguientes">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" /></svg>
+      </button>
+    </div>
+  </div>
+</section>

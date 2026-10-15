@@ -1,0 +1,17 @@
+---
+import { CONTACT_EMAIL, CTA_HREF, CTA_LABEL, contact } from "../../data/landing";
+---
+<section class="l-contact" id="contacto" aria-labelledby="contacto-title">
+  <div class="l-container l-contact-inner">
+    <div data-reveal>
+      <span class="l-eyebrow">Contacto</span>
+      <h2 class="l-display" id="contacto-title">{contact.title}</h2>
+    </div>
+    <div class="l-contact-actions" data-reveal style="--reveal-i: 1">
+      <a class="l-btn l-btn--inverted" href={CTA_HREF}>{CTA_LABEL}</a>
+      <p class="l-contact-mail">
+        {contact.emailLabel} <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+      </p>
+    </div>
+  </div>
+</section>

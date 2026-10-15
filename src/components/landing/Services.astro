@@ -1,0 +1,40 @@
+---
+import { services } from "../../data/landing";
+---
+<section class="l-section" id="servicios" aria-labelledby="servicios-title">
+  <div class="l-container">
+    <div class="l-section-head" data-reveal>
+      <div>
+        <span class="l-eyebrow">Servicios</span>
+        <h2 class="l-heading" id="servicios-title">Tres formas de trabajar juntos.</h2>
+      </div>
+    </div>
+
+    {/* <details name> hace el acordeón exclusivo de forma nativa; landing.ts lo replica donde no hay soporte. */}
+    <div class="l-accordion" data-accordion data-reveal style="--reveal-i: 1">
+      {services.map((service, i) => (
+        <details class="l-acc" name="servicios" open={i === 0}>
+          <summary>
+            <span class="l-acc-num">{service.number}</span>
+            <span class="l-acc-title">
+              <span class="l-acc-name">{service.name}</span>
+              <span class="l-acc-hook">{service.hook}</span>
+            </span>
+            <span class="l-acc-icon" aria-hidden="true"></span>
+          </summary>
+          <div class="l-acc-body">
+            <div class="l-media">
+              <img src={service.image.src} alt={service.image.alt} width="1200" height="900" loading="lazy" decoding="async" />
+            </div>
+            <div class="l-acc-list">
+              <h3 class="l-eyebrow l-acc-list-label">Incluye</h3>
+              <ul class="l-checklist">
+                {service.includes.map((item) => <li>{item}</li>)}
+              </ul>
+            </div>
+          </div>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>

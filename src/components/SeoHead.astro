@@ -5,16 +5,17 @@ interface Props {
   canonical: string;
   image?: string;
   noindex?: boolean;
+  siteName?: string;
 }
 
 const SITE_URL = "https://builders.asilodigital.com";
-const { title, description, canonical, image = `${SITE_URL}/og-image.png`, noindex = false } = Astro.props;
+const { title, description, canonical, image = `${SITE_URL}/og-image.png`, noindex = false, siteName = "Asilo Builders" } = Astro.props;
 ---
 <title>{title}</title>
 <meta name="description" content={description} />
 <link rel="canonical" href={canonical} />
 <meta property="og:type" content="website" />
-<meta property="og:site_name" content="Asilo Builders" />
+<meta property="og:site_name" content={siteName} />
 <meta property="og:locale" content="es_VE" />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />

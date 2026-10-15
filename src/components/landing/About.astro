@@ -1,0 +1,35 @@
+---
+import { about } from "../../data/landing";
+---
+<section class="l-section" id="nosotros" aria-labelledby="nosotros-title">
+  <div class="l-container l-about-grid">
+    <div data-reveal>
+      <span class="l-eyebrow">Nosotros</span>
+      <h2 class="l-heading" id="nosotros-title">{about.title}</h2>
+    </div>
+
+    <div class="l-card l-letter" data-reveal style="--reveal-i: 1">
+      <span class="l-tag">Desde enero de 2021</span>
+      {about.body.map((paragraph) => <p>{paragraph}</p>)}
+      <p class="l-signature">{about.signature}</p>
+    </div>
+  </div>
+
+  <div class="l-container">
+    <ul class="l-team" aria-label="Equipo">
+      {about.team.map((member, i) => (
+        <li data-reveal style={`--reveal-i: ${i}`}>
+          <figure class="l-card l-member">
+            <div class="l-media">
+              <img src={member.photo} alt={`Foto de ${member.name}`} width="800" height="1000" loading="lazy" decoding="async" />
+            </div>
+            <figcaption>
+              <strong>{member.name}</strong>
+              <span class="l-tag">{member.role}</span>
+            </figcaption>
+          </figure>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
