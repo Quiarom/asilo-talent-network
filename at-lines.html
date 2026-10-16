@@ -27,6 +27,7 @@
    Every frame is a pure function of t, so render(t) is deterministic — the
    same function drives the live preview and the MP4 export.
    URL params: ?seed=123  ?blue=0.3 (share of blue @)  ?logos=0.2 (share of logos)
+   ?cycles=8 (minimum number of 8 s cycles; 8 → a 64 s loop where every logo shows 2–3×)
    ========================================================================== */
 (function () {
   const W = 1920, H = 1080, LOOP = 8;
@@ -101,7 +102,8 @@
      every logo shows up once per loop and repeats on screen are rare. */
   const logoImgs = LOGOS.map((l) => { const im = new Image(); im.src = l.src; return im; });
   const perCycle = logoImgs.length ? Math.round(terminals.length * LOGO_FRAC) : 0;
-  const CYCLES = Math.max(3, perCycle ? Math.ceil(logoImgs.length / perCycle) : 3);
+  const MIN_CYCLES = Math.max(1, Math.round(+params.get("cycles") || 3));
+  const CYCLES = Math.max(MIN_CYCLES, perCycle ? Math.ceil(logoImgs.length / perCycle) : 3);
   const MASTER = LOOP * CYCLES;
   const deckRnd = mulberry32(SEED ^ 0x5eed);
   const deck = logoImgs.map((_, i) => i);
