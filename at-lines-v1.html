@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Asilo — Arroba Lines v1</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #111111; }
+  body { display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  canvas { display: block; width: min(100vw, calc(100vh * 16 / 9)); height: auto; aspect-ratio: 16 / 9; }
+</style>
+</head>
+<body>
+<canvas id="stage" width="1920" height="1080" aria-label="Líneas que convergen y terminan en arrobas"></canvas>
+<script>
+/* ==========================================================================
+   Arroba Lines v1 (frozen starting point — do not edit; iterate in at-lines.html).
+   1920×1080 landscape, seamless 8 s loop.
+   Lines fan out from a vanishing point beyond the left edge. "Terminal" lines
+   shoot in, land on a grid point and an @ pops in at the tip; later the line
+   retracts into the @ and the @ fades. A faint static streak field (with slow
+   glints) keeps the frame alive, like the reference.
+
+   Every frame is a pure function of t, so render(t) is deterministic — the
+   same function drives the live preview and the MP4 export.
+   URL params: ?seed=123  ?blue=0.3 (share of blue @)
+   ========================================================================== */
+(function () {
+  const W = 1920, H = 1080, LOOP = 8;
+  const params = new URLSearchParams(location.search);
+  const SEED = +params.get("seed") || 20261016;
+  const BLUE_FRAC = params.has("blue") ? +params.get("blue") : 0.3;
+
+  const COLOR = { bg: "#111111", grey: "#4a4a4a", blue: "#2A79FF" };
+  const O = { x: -340, y: 560 };          // vanishing point, off the left edge
+  const AT_FONT = '400 38px "Helvetica Neue", Helvetica, Arial, sans-serif';
+
+  const canvas = document.getElementById("stage");
+  const ctx = canvas.getContext("2d");
+
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6d2b79f5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  const rnd = mulberry32(SEED);
+  const range = (a, b) => a + rnd() * (b - a);
+  const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+  const easeOutCubic = (x) => 1 - Math.pow(1 - x, 3);
+  const easeInOutCubic = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+  const easeOutBack = (x) => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+
+  /* ---- Static streak field (no @) ---- */
+  const MIN_A = Math.atan2(0 - O.y, 0 - O.x) - 0.02;   // steepest ray that still hits the frame (top-left)
+  const MAX_A = Math.atan2(H - O.y, 0 - O.x) + 0.02;   // (bottom-left)
+  const streaks = [];
+  for (let i = 0; i < 64; i++) {
+    const a = range(MIN_A, MAX_A);
+    const s = { a, alpha: range(0.035, 0.085), width: range(1.1, 2.2) };
+    streaks.push(s);
+    if (rnd() < 0.45) streaks.push({ a: a + range(0.003, 0.009), alpha: s.alpha * 0.8, width: s.width * 0.8 });
+  }
+  // A few streaks carry a slow glint so the field never sits still.
+  const glints = streaks.filter(() => rnd() < 0.3).map((s) => ({
+    a: s.a, period: LOOP / (rnd() < 0.5 ? 1 : 2), off: rnd(), len: range(140, 260),
+  }));
+
+  /* ---- Terminal lines: each lands on a grid point and gets an @ ---- */
+  const terminals = [];
+  for (let r = 0; r < 10; r++) {
+    for (let k = 0; k < 19; k++) {
+      const ex = 108 + 97 * k, ey = 90 + 100 * r;
+      if (ex < 300 || rnd() > 0.4) continue;
+      const dx = ex - O.x, dy = ey - O.y, D = Math.hypot(dx, dy);
+      const t = {
+        ex, ey, ux: dx / D, uy: dy / D, end: D - 26,       // stop just short of the glyph
+        blue: rnd() < BLUE_FRAC,
+        phase: rnd() * LOOP,
+        grow: range(1.1, 1.6), hold: range(2.2, 3.2), retract: range(1.0, 1.4), fade: 0.5,
+        companion: rnd() < 0.5 ? { da: range(-0.008, 0.008), k: range(0.9, 1.06) } : null,
+      };
+      terminals.push(t);
+    }
+  }
+
+  function seg(x1, y1, x2, y2) { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); }
+
+  // Stroke a ray from the vanishing point between distances d0..d1.
+  function ray(ux, uy, d0, d1) { seg(O.x + ux * d0, O.y + uy * d0, O.x + ux * d1, O.y + uy * d1); }
+
+  // Gradient segment along a ray, transparent at d0 → color at d1.
+  function gradRay(ux, uy, d0, d1, rgb, alpha, width) {
+    if (d1 <= d0) return;
+    const x0 = O.x + ux * d0, y0 = O.y + uy * d0, x1 = O.x + ux * d1, y1 = O.y + uy * d1;
+    const g = ctx.createLinearGradient(x0, y0, x1, y1);
+    g.addColorStop(0, `rgba(${rgb},0)`);
+    g.addColorStop(1, `rgba(${rgb},${alpha})`);
+    ctx.strokeStyle = g; ctx.lineWidth = width;
+    seg(x0, y0, x1, y1);
+  }
+
+  function lineState(tm, t) {
+    const local = (((t - tm.phase) % LOOP) + LOOP) % LOOP;
+    const a = tm.grow, b = a + tm.hold, c = b + tm.retract, d = c + tm.fade;
+    if (local < a) return { head: easeOutCubic(local / a), tail: 0, at: 0, pop: 0, growing: true };
+    const pop = clamp01((local - a) / 0.35);
+    if (local < b) return { head: 1, tail: 0, at: pop, pop };
+    if (local < c) return { head: 1, tail: easeInOutCubic((local - b) / tm.retract), at: 1, pop: 1 };
+    if (local < d) return { head: 1, tail: 1, at: 1 - (local - c) / tm.fade, pop: 1 };
+    return null;
+  }
+
+  function render(t) {
+    ctx.fillStyle = COLOR.bg;
+    ctx.fillRect(0, 0, W, H);
+    ctx.lineCap = "round";
+
+    // Streak field
+    for (const s of streaks) {
+      ctx.strokeStyle = `rgba(255,255,255,${s.alpha})`;
+      ctx.lineWidth = s.width;
+      ray(Math.cos(s.a), Math.sin(s.a), 0, 2800);
+    }
+    for (const g of glints) {
+      const ux = Math.cos(g.a), uy = Math.sin(g.a);
+      const d0 = -O.x / ux, d1 = 2700;                       // from the left edge to off-frame
+      const p = ((t / g.period + g.off) % 1);
+      const head = d0 + p * (d1 - d0 + g.len);
+      gradRay(ux, uy, head - g.len, head, "255,255,255", 0.16, 1.6);
+    }
+
+    // Terminal lines + their @
+    const ats = [];
+    for (const tm of terminals) {
+      const st = lineState(tm, t);
+      if (!st) continue;
+      const dHead = tm.end * st.head, dTail = tm.end * st.tail;
+      if (dHead - dTail > 1) {
+        ctx.strokeStyle = "rgba(255,255,255,0.10)";
+        ctx.lineWidth = 1.8;
+        ray(tm.ux, tm.uy, dTail, dHead);
+        if (tm.companion) {
+          const a = Math.atan2(tm.uy, tm.ux) + tm.companion.da;
+          ctx.strokeStyle = "rgba(255,255,255,0.06)";
+          ctx.lineWidth = 1.3;
+          ray(Math.cos(a), Math.sin(a), dTail * tm.companion.k, dHead * tm.companion.k);
+        }
+        const rgb = tm.blue ? "42,121,255" : "210,210,210";
+        if (st.growing) {
+          gradRay(tm.ux, tm.uy, Math.max(dTail, dHead - 150), dHead, rgb, tm.blue ? 0.9 : 0.5, 2.2);   // bright travelling head
+        } else if (tm.blue) {
+          gradRay(tm.ux, tm.uy, Math.max(dTail, tm.end - 220), tm.end, rgb, 0.32, 1.8);                 // blue tint into the @
+        }
+      }
+      if (st.at > 0) ats.push({ tm, alpha: st.at, scale: 0.7 + 0.3 * easeOutBack(st.pop) });
+    }
+
+    ctx.font = AT_FONT;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    for (const { tm, alpha, scale } of ats) {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.translate(tm.ex, tm.ey);
+      ctx.scale(scale, scale);
+      if (tm.blue) { ctx.shadowColor = "rgba(42,121,255,0.45)"; ctx.shadowBlur = 16; }
+      ctx.fillStyle = tm.blue ? COLOR.blue : COLOR.grey;
+      ctx.fillText("@", 0, 0);
+      ctx.restore();
+    }
+  }
+
+  window.renderFrame = render;          // used by the MP4 exporter
+  window.LOOP_SECONDS = LOOP;
+
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+  if (reduced.matches || params.has("still")) { render(+params.get("still") || 3.5); return; }
+  let start = performance.now();
+  function frame(now) {
+    render(((now - start) / 1000) % LOOP);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
