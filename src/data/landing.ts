@@ -35,7 +35,6 @@ export interface Service {
   name: string;
   hook: string;
   includes: string[];
-  image: ImageAsset;
 }
 
 export const services: Service[] = [
@@ -49,21 +48,18 @@ export const services: Service[] = [
       "Benchmark de competidores",
       "Reporte con quick wins",
     ],
-    image: { src: "/placeholders/service-1.webp", alt: "Ejemplo de reporte de UX Assessment" },
   },
   {
     number: "02",
     name: "UI/UX e Identidad",
     hook: "Tu app funciona, pero se ve como todas.",
     includes: ["Rediseño de flujos", "UI de alta fidelidad", "Identidad de marca", "Design system base"],
-    image: { src: "/placeholders/service-2.webp", alt: "Ejemplo de rediseño de UI e identidad" },
   },
   {
     number: "03",
     name: "Implementaciones",
     hook: "Tienes el diseño, falta construirlo.",
     includes: ["Sitios en Framer/Webflow", "Front-end", "QA de diseño"],
-    image: { src: "/placeholders/service-3.webp", alt: "Ejemplo de implementación en producción" },
   },
 ];
 
@@ -75,17 +71,15 @@ export interface Project {
 }
 
 // Proyectos recientes: cuadrícula de 3 columnas dentro del hero.
-// TODO: reemplazar la imagen de cada proyecto por la real (misma ruta, otro archivo).
-const projectImage = (name: string): ImageAsset => ({ src: "/projects/proyecto.jpg", alt: `Proyecto ${name}` });
-
+// Las imágenes son shots de https://dribbble.com/ifcam (carpeta /public/projects, 1200×900).
 export const projects: Project[] = [
-  { name: "Empléate", year: "2026", tags: "UX Assessment, Fintech" },
-  { name: "Tillín", year: "2026", tags: "UI/UX e Identidad, Logística" },
-  { name: "Gama", year: "2024", tags: "Implementaciones, Web" },
-  { name: "Trazando Futuros", year: "2024", tags: "UI/UX e Identidad, App" },
-  { name: "Mattelsa", year: "2024", tags: "UX Assessment, Web" },
-  { name: "CRTecnológicas", year: "2023", tags: "Implementaciones, Design system" },
-].map((p) => ({ ...p, image: projectImage(p.name) }));
+  { name: "Olímpica App", year: "2024", tags: "UI/UX, E-commerce", image: { src: "/projects/olimpica.webp", alt: "Olímpica App 2024, diseño de app de e-commerce" } },
+  { name: "Tillín", year: "2026", tags: "UI/UX e Identidad, Logística", image: { src: "/projects/tilin.webp", alt: "Tilín, app de servicios para el hogar" } },
+  { name: "Gama", year: "2024", tags: "Implementaciones, Web", image: { src: "/projects/gama.webp", alt: "Automercados Gama, cajas de autopago" } },
+  { name: "Diners Club Mall App", year: "2023", tags: "UI/UX, E-commerce", image: { src: "/projects/diners.webp", alt: "Diners Club Mall App 2023, diseño de app" } },
+  { name: "Mattelsa", year: "2024", tags: "UX Assessment, Web", image: { src: "/projects/mattelsa.webp", alt: "Mattelsa Redesign 2024, tienda de moda" } },
+  { name: "Corona App", year: "2023", tags: "UI/UX, Moda", image: { src: "/projects/corona.webp", alt: "Corona App 2023, diseño de app de moda" } },
+];
 
 export interface Testimonial {
   quote: string;

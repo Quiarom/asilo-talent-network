@@ -73,7 +73,7 @@ describe("landing de servicios", () => {
     const html = await render();
     const hero = html.slice(html.indexOf('id="inicio"'), html.indexOf('id="servicios"'));
 
-    expect(projects.map((p) => p.name)).toEqual(["Empléate", "Tillín", "Gama", "Trazando Futuros", "Mattelsa", "CRTecnológicas"]);
+    expect(projects.map((p) => p.name)).toEqual(["Olímpica App", "Tillín", "Gama", "Diners Club Mall App", "Mattelsa", "Corona App"]);
     expect(hero.match(/class="l-project"/g)).toHaveLength(projects.length);
     for (const project of projects) {
       expect(hero).toContain(project.name);
@@ -137,7 +137,6 @@ describe("landing de servicios", () => {
     const paths = [
       ...hero.avatars,
       ...hero.clientLogos.map((logo) => logo.src),
-      ...services.map((service) => service.image.src),
       ...projects.map((project) => project.image.src),
       ...testimonials.items.map((item) => item.avatar),
       faq.card.avatar,
