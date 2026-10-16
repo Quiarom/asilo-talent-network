@@ -1,59 +1,12 @@
 ---
 import Logo from "./Logo.astro";
-import { CTA_HREF, CTA_LABEL, navLinks } from "../../data/landing";
+import { CTA_HREF, CTA_LABEL } from "../../data/landing";
 ---
 <header class="l-nav">
   <div class="l-container l-nav-inner">
     <Logo />
-    <nav aria-label="Navegación principal">
-      <ul class="l-nav-links">
-        {navLinks.map((link) => <li><a href={link.href}>{link.label}</a></li>)}
-      </ul>
-    </nav>
     <div class="l-nav-actions">
-      <a class="l-btn l-btn--primary l-btn--pill l-nav-cta" href={CTA_HREF}>{CTA_LABEL}</a>
-      <button class="l-menu-btn" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="l-menu" data-menu-open>
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M2 5h14M2 13h14" stroke="currentColor" stroke-width="1.5" /></svg>
-        Menú
-      </button>
+      <a class="l-btn l-btn--primary" href={CTA_HREF}>{CTA_LABEL}</a>
     </div>
   </div>
 </header>
-
-<dialog class="l-menu" id="l-menu" aria-label="Menú">
-  <div class="l-container l-menu-top">
-    <Logo />
-    <button class="l-menu-btn" type="button" data-menu-close autofocus>
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.5" /></svg>
-      Cerrar
-    </button>
-  </div>
-  <nav class="l-container" aria-label="Navegación móvil">
-    <ul class="l-menu-links">
-      {navLinks.map((link, i) => (
-        <li><a href={link.href} data-menu-link><span>0{i + 1}</span>{link.label}</a></li>
-      ))}
-    </ul>
-  </nav>
-  <div class="l-container l-menu-foot">
-    <a class="l-btn l-btn--primary" href={CTA_HREF} data-menu-link>{CTA_LABEL}</a>
-  </div>
-</dialog>
-
-<script>
-  const menu = document.querySelector<HTMLDialogElement>("#l-menu");
-  const openBtn = document.querySelector<HTMLButtonElement>("[data-menu-open]");
-
-  if (menu && openBtn) {
-    openBtn.addEventListener("click", () => {
-      menu.showModal();
-      openBtn.setAttribute("aria-expanded", "true");
-    });
-    menu.addEventListener("close", () => openBtn.setAttribute("aria-expanded", "false"));
-    menu.querySelector("[data-menu-close]")?.addEventListener("click", () => menu.close());
-    // Cierra antes de navegar al ancla para que el scroll ocurra sobre la página.
-    menu.querySelectorAll("[data-menu-link]").forEach((link) => link.addEventListener("click", () => menu.close()));
-    // Si la ventana pasa a escritorio con el menú abierto, ciérralo.
-    matchMedia("(min-width: 768px)").addEventListener("change", (e) => e.matches && menu.open && menu.close());
-  }
-</script>

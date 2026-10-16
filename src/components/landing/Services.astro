@@ -12,8 +12,8 @@ import { services } from "../../data/landing";
 
     {/* <details name> hace el acordeón exclusivo de forma nativa; landing.ts lo replica donde no hay soporte. */}
     <div class="l-accordion" data-accordion data-reveal style="--reveal-i: 1">
-      {services.map((service, i) => (
-        <details class="l-acc" name="servicios" open={i === 0}>
+      {services.map((service) => (
+        <details class="l-acc" name="servicios">
           <summary>
             <span class="l-acc-num">{service.number}</span>
             <span class="l-acc-title">

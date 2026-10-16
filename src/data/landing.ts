@@ -2,24 +2,16 @@
 // Todo el copy, los links y las rutas de imágenes viven aquí para editarlos sin tocar el markup.
 // Las imágenes son placeholders en /public/placeholders: reemplaza el archivo y mantén el nombre.
 
-export const CTA_LABEL = "Agenda un diagnóstico";
+export const CTA_LABEL = "Contáctanos";
 
-// Todos los CTA principales apuntan aquí. TODO: conectar a Cal.com.
-export const CTA_HREF = "#contacto";
+// Todos los CTA principales abren WhatsApp con un mensaje prellenado.
+export const WHATSAPP_NUMBER = "584126310981";
+export const CTA_HREF = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+  "Hola, Asilo Digital. Quiero conversar sobre mi app.",
+)}`;
 
 // TODO: confirmar el correo de contacto definitivo.
 export const CONTACT_EMAIL = "hola@asilodigital.com";
-
-export interface NavLink {
-  label: string;
-  href: string;
-}
-
-export const navLinks: NavLink[] = [
-  { label: "Servicios", href: "#servicios" },
-  { label: "Proceso", href: "#proceso" },
-  { label: "Trabajo", href: "#trabajo" },
-];
 
 export interface ImageAsset {
   src: string;
@@ -36,10 +28,6 @@ export const hero = {
   avatars: [1, 2, 3, 4, 5].map((n) => `/placeholders/avatar-${n}.webp`),
   // TODO: reemplazar con logos reales de clientes (con permiso). SVG o PNG en escala de grises.
   clientLogos: [1, 2, 3, 4, 5, 6].map((n) => ({ src: `/placeholders/logo-${n}.svg`, name: `Cliente ${n}` })),
-  // TODO: reemplazar con pantallas reales de apps diseñadas.
-  screens: [1, 2, 3, 4, 5, 6].map(
-    (n): ImageAsset => ({ src: `/placeholders/screen-${n}.webp`, alt: `Pantalla de app diseñada por Asilo ${n}` }),
-  ),
 };
 
 export interface Service {
@@ -79,71 +67,25 @@ export const services: Service[] = [
   },
 ];
 
-export interface ProcessStep {
-  number: string;
-  title: string;
-  description: string;
-  image: ImageAsset;
-}
-
-export const processSteps: ProcessStep[] = [
-  {
-    number: "01",
-    title: "Diagnosticamos",
-    description: "Entendemos tu negocio y cómo usan tu app tus usuarios.",
-    image: { src: "/placeholders/process-1.webp", alt: "Sesión de diagnóstico" },
-  },
-  {
-    number: "02",
-    title: "Diseñamos",
-    description: "Flujos e identidad, con revisiones hasta que funcione.",
-    image: { src: "/placeholders/process-2.webp", alt: "Flujos de diseño en revisión" },
-  },
-  {
-    number: "03",
-    title: "Implementamos",
-    description: "Lo llevamos a producción contigo.",
-    image: { src: "/placeholders/process-3.webp", alt: "Producto implementado en producción" },
-  },
-];
-
-export interface WorkCase {
+export interface Project {
   name: string;
-  problem: string;
-  service: string;
   year: string;
+  tags: string;
   image: ImageAsset;
 }
 
-export const workCases: WorkCase[] = [
-  // TODO: reemplazar con caso real
-  {
-    name: "Pana Pay",
-    problem: "La mitad de los usuarios abandonaba el registro antes de verificar su cuenta.",
-    service: "UX Assessment",
-    year: "2025",
-    image: { src: "/placeholders/case-1.webp", alt: "Pantallas del proyecto Pana Pay" },
-  },
-  // TODO: reemplazar con caso real
-  {
-    name: "Ruta Viva",
-    problem: "Una app de logística que funcionaba bien, pero nadie la recordaba.",
-    service: "UI/UX e Identidad",
-    year: "2025",
-    image: { src: "/placeholders/case-2.webp", alt: "Pantallas del proyecto Ruta Viva" },
-  },
-  // TODO: reemplazar con caso real
-  {
-    name: "Cuaderno",
-    problem: "El diseño estaba aprobado hace meses y seguía sin llegar a producción.",
-    service: "Implementaciones",
-    year: "2024",
-    image: { src: "/placeholders/case-3.webp", alt: "Pantallas del proyecto Cuaderno" },
-  },
-];
+// Proyectos recientes: cuadrícula de 3 columnas dentro del hero.
+// TODO: reemplazar la imagen de cada proyecto por la real (misma ruta, otro archivo).
+const projectImage = (name: string): ImageAsset => ({ src: "/projects/proyecto.jpg", alt: `Proyecto ${name}` });
 
-// TODO: apuntar a la página con todos los casos cuando exista.
-export const allCasesHref = "#trabajo";
+export const projects: Project[] = [
+  { name: "Empléate", year: "2026", tags: "UX Assessment, Fintech" },
+  { name: "Tillín", year: "2026", tags: "UI/UX e Identidad, Logística" },
+  { name: "Gama", year: "2024", tags: "Implementaciones, Web" },
+  { name: "Trazando Futuros", year: "2024", tags: "UI/UX e Identidad, App" },
+  { name: "Mattelsa", year: "2024", tags: "UX Assessment, Web" },
+  { name: "CRTecnológicas", year: "2023", tags: "Implementaciones, Design system" },
+].map((p) => ({ ...p, image: projectImage(p.name) }));
 
 export interface Testimonial {
   quote: string;

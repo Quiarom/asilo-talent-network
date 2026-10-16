@@ -1,7 +1,7 @@
 ---
 import { testimonials } from "../../data/landing";
 ---
-<section class="l-section" id="testimonios" aria-labelledby="testimonios-title">
+<section class="l-section l-testimonials-section" id="testimonios" aria-labelledby="testimonios-title">
   <div class="l-container">
     <div class="l-section-head" data-reveal>
       <div>
@@ -9,24 +9,31 @@ import { testimonials } from "../../data/landing";
         <h2 class="l-heading" id="testimonios-title">{testimonials.title}</h2>
       </div>
     </div>
+  </div>
 
-    <ul class="l-testimonials">
-      {testimonials.items.map((item, i) => (
-        <li data-reveal style={`--reveal-i: ${i}`}>
-          <figure class="l-card l-quote">
+  {/* Sin JS son tarjetas en cuadrícula; stagger-testimonials.ts las convierte en el carrusel escalonado. */}
+  <div class="l-stagger" data-stagger>
+    <ul class="l-stagger-list">
+      {testimonials.items.map((item) => (
+        <li class="l-stagger-card" data-stagger-card>
+          <span class="l-stagger-cut" aria-hidden="true"></span>
+          <figure>
+            <img src={item.avatar} alt="" width="48" height="56" loading="lazy" decoding="async" />
             <blockquote>
               <p>{item.quote}</p>
             </blockquote>
-            <figcaption>
-              <img src={item.avatar} alt="" width="40" height="40" loading="lazy" decoding="async" />
-              <span>
-                <strong>{item.name}</strong>
-                <span class="l-tag">{item.role}</span>
-              </span>
-            </figcaption>
+            <figcaption>— {item.name}, {item.role}</figcaption>
           </figure>
         </li>
       ))}
     </ul>
+    <div class="l-stagger-controls">
+      <button class="l-stagger-btn" type="button" data-stagger-prev aria-label="Testimonio anterior">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+      <button class="l-stagger-btn" type="button" data-stagger-next aria-label="Testimonio siguiente">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+    </div>
   </div>
 </section>
