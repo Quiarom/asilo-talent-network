@@ -311,7 +311,7 @@ touch/coarse pointers and under reduced‑motion; idle cost is zero.
 2. Load **Doto** + **IBM Plex Sans**; keep the two‑family rule and one accent.
 3. Copy `scroll-reveal.js` + its CSS for `data-decode` / `data-reveal`.
 4. Keep `ascii-background.js` (the `data-ascii-src` engine) for image‑driven
-   backgrounds; keep `ascii-cursor.js` for the pointer trail.
+   backgrounds.
 5. Default to native elements (`<dialog>`, form validation) before any library.
 6. Build section‑by‑section against the design; each risky idea = its own commit.
 

@@ -58,7 +58,7 @@ export const resourceCategories: ResourceCategory[] = [
       { name: "Behance", url: "https://www.behance.net", desc: "Plataforma de Adobe para mostrar y descubrir trabajo creativo de todas las disciplinas.", tag: "free" },
       { name: "Cosmos", url: "https://www.cosmos.so", desc: "Herramienta de marcadores visuales para recopilar y organizar inspiración de diseño.", tag: "freemium" },
       { name: "Designspiration", url: "https://www.designspiration.com", desc: "Plataforma de inspiración basada en búsqueda, filtrable por color, patrón y estilo.", tag: "free" },
-      { name: "Designer Daily Report", url: "https://app.designerdailyreport.com", desc: "Feed curado de los últimos diseños de UI, actualizado a diario.", tag: "free" },
+      { name: "Designer Daily Report", url: "https://designerdailyreport.com", desc: "Feed curado de los últimos diseños de UI, actualizado a diario.", tag: "free" },
       { name: "Swissted", url: "https://www.swissted.com", desc: "Afiches de conciertos de punk rock reinventados con tipografía de estilo suizo internacional.", tag: "free" },
       { name: "Resource.fyi", url: "https://resource.fyi", desc: "Directorio curado de herramientas y recursos de diseño gratuitos para creativos.", tag: "free" },
       { name: "Brrranding", url: "https://www.brrranding.com", desc: "Galería curada de trabajos de branding e identidad visual para inspirarte.", tag: "" },

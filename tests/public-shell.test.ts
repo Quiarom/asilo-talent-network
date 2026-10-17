@@ -39,7 +39,7 @@ describe("public shell", () => {
     const html = await renderShell();
 
     expect(html).toMatch(/<meta\b[^>]*name=["']theme-color["'][^>]*content=["']#0f1011["']/);
-    expect(html).toMatch(/<link\b[^>]*rel=["']icon["'][^>]*href=["']\/favicon\.svg\?v=20260911["']/);
+    expect(html).toMatch(/<link\b[^>]*rel=["']icon["'][^>]*href=["']\/favicon\.png\?v=20261017["']/);
   });
 
   it("does not render an analytics consent banner", async () => {
