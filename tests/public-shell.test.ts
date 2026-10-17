@@ -149,10 +149,11 @@ describe("closing CTA", () => {
 
 describe("CTA heading", () => {
   // Its mobile wrap is checked in the browser (e2e/layout.spec.ts).
-  it("keeps the decode text plain, without manual line breaks", async () => {
+  it("splits the title into two masked lines for the scroll reveal", async () => {
     const html = await renderShell();
 
-    expect(html).toContain('data-decode>Deja de construir solo</h2>');
+    expect(html).toContain("<span>Deja de</span>");
+    expect(html).toContain("<span>construir solo</span>");
     expect(html).not.toContain("cta-title-mobile-break");
   });
 

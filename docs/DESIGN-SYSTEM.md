@@ -20,7 +20,7 @@ update this file.
   - `src/components/ProjectDirectory.astro` — Proyectos head, sort control, carousel
   - `src/components/ProjectCard.astro` / `ProjectPages.astro` — card + carousel pages
   - `src/components/ProjectFormModal.astro` — the add / edit-request modal form
-  - `src/scripts/` — `ascii-background.js`, `ascii-cursor.js`, `scroll-reveal.js`
+  - `src/scripts/` — `ascii-background.js`, `scroll-reveal.js`
 
 ---
 
@@ -267,21 +267,17 @@ content shows without JS; `prefers-reduced-motion` shows everything instantly.
 CSS lives at the bottom of `global.css` (`.js [data-reveal] …`).
 
 ### ASCII background — `src/scripts/ascii-background.js`
-Renders an image as animated ASCII on a canvas. Generalized to boot on **any**
+Renders an image as ASCII on a canvas, with a one‑shot materialize reveal when it scrolls into view (then it holds still). Generalized to boot on **any**
 `<canvas data-ascii-src="/img.png">`, so the hero and any section can each have
 their own image with one engine.
 
 ```html
-<canvas id="ascii" data-ascii-src="/ascii-skyline.png" aria-hidden="true"></canvas>
+<canvas id="ascii" data-ascii-src="/ascii-skyline.jpg" aria-hidden="true"></canvas>
 ```
 
 Pair a background canvas with a **veil** (`::after` gradient) so overlaid text
 stays readable, and content on top via `z-index`. Instances pause off‑screen via
 `IntersectionObserver`; honors reduced‑motion. Accent glyph color = `--blue-500`.
-
-### Cursor trail — `src/scripts/ascii-cursor.js`
-A page‑wide wake of flickering glyphs following the pointer. Disabled on
-touch/coarse pointers and under reduced‑motion; idle cost is zero.
 
 ---
 
