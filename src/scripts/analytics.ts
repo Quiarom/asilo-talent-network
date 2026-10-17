@@ -5,6 +5,7 @@ const token = import.meta.env.PUBLIC_MIXPANEL_TOKEN;
 const MAX_QUEUED = 50;
 let client: Mixpanel | undefined;
 let loading = false;
+let failed = false;
 const queue: Array<[string, Properties]> = [];
 
 export const isAnalyticsConfigured = Boolean(token);
@@ -27,6 +28,7 @@ export function startAnalytics(): boolean {
       })
       .catch(() => {
         // Keep `loading` set so a blocked chunk isn't retried on every track().
+        failed = true;
         queue.length = 0;
       });
   }
@@ -35,7 +37,7 @@ export function startAnalytics(): boolean {
 
 // Events fired before Mixpanel finishes loading are queued and replayed in order.
 export function track(event: string, properties: Properties): void {
-  if (!token) return;
+  if (!token || failed) return;
   if (client) client.track(event, properties);
   else if (queue.length < MAX_QUEUED) queue.push([event, properties]);
   startAnalytics();

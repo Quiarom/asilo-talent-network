@@ -305,18 +305,18 @@ function initAscii(canvas, IMAGE_SRC) {
     }
   }
 
-  var running=false, done=false, rafId=0, startedAt=0, lastFrame=0, inView=true;
-  function idle(){ paint(done ? 1 : 0); }
+  var running=false, done=false, rafId=0, startedAt=0, lastFrame=0, inView=true, progress=0;
+  function idle(){ paint(done ? 1 : progress); }
   function frame(now){
     if(!running){ rafId=0; return; }
     rafId=requestAnimationFrame(frame);
     if(now-lastFrame < 1000/CONFIG.fps-1) return;
     lastFrame=now;
-    var p=Math.min(1,(now-startedAt)/CONFIG.revealMs);
+    var p=progress=Math.min(1,(now-startedAt)/CONFIG.revealMs);
     paint(p);
     if(p>=1){ done=true; stop(); }   // settled: no more frames until the theme or size changes
   }
-  function start(){ if(running||!layout()) return; running=true; startedAt=performance.now(); lastFrame=0; rafId=requestAnimationFrame(frame); }
+  function start(){ if(running||!layout()) return; running=true; startedAt=performance.now()-progress*CONFIG.revealMs; lastFrame=0; rafId=requestAnimationFrame(frame); }
   function stop(){ running=false; if(rafId) cancelAnimationFrame(rafId); rafId=0; }
   function sync(){ if(reduced.matches){ stop(); done=true; if(layout()) paint(1); return; } if(done){ stop(); return; } if(document.visibilityState==="visible"&&inView&&canvas.clientWidth>0) start(); else stop(); }
 

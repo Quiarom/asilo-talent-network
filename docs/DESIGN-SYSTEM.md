@@ -13,7 +13,7 @@ update this file.
   libraries.** Prefer native elements (`<dialog>`, form validation) over deps.
 - **Canonical files:**
   - `src/styles/global.css` — tokens + every component (the real source of truth)
-  - `src/styles/fonts.css` — `@font-face` for Doto + IBM Plex Sans
+  - `src/styles/fonts.css` — `@font-face` for Averia Serif Libre, Geist and Roboto Mono
   - `src/layouts/BaseLayout.astro` — `<head>`, header, footer for inner pages (the homepage and `/proyectos` compose `SiteHeader` and `SiteFooter` directly)
   - `src/pages/index.astro` — homepage composition
   - `src/pages/proyectos/[slug].astro` — project detail (edit request)
@@ -30,8 +30,8 @@ update this file.
    names. Add the token first, use it everywhere.
 2. **One accent.** Sky blue `--blue-500` (`#cee2ff`) is the *only* accent. No
    second hue. (A saturated `#0066ff` was tried and removed.)
-3. **Two typefaces, used with discipline.** Doto for identity (display), IBM Plex
-   Sans for everything readable. Never add a third family.
+3. **Two typefaces, used with discipline.** Averia Serif Libre for identity
+   (display), Geist for everything readable; Roboto Mono only for counters.
 4. **Hairlines, not boxes.** Separate things with 1px borders and faint fills,
    not heavy cards/shadows. Spend border/fill/radius by role.
 5. **Dark‑first, on purpose.** `:root { color-scheme: dark }`. The page commits
@@ -102,23 +102,24 @@ Two families, loaded via `fonts.css` (self‑hosted woff2) and preloaded in the
 
 | Role | Family | Token | Notes |
 |---|---|---|---|
-| Display | **Doto** (pixel) | `--font-display` | headings, hero title, counters, section titles. Weight **900** (`font-variation-settings: "wght" 900`). Usually `text-transform: uppercase`. |
-| Body / UI | **IBM Plex Sans** | `--font-text` | all running text, labels, buttons, inputs. Weights 400/500. |
+| Display | **Averia Serif Libre** | `--font-display` | headings, hero title, section titles. Weights 400/700 (+ italic 400). |
+| Body / UI | **Geist** | `--font-text` | all running text, labels, buttons, inputs. Variable 400–500 (never 600+: no synthetic bold). |
 
-Fallbacks: `--font-display: "Doto", ui-monospace, monospace` ·
-`--font-text: "IBM Plex Sans", system-ui, sans-serif`.
+Fallbacks: `--font-display: "Averia Serif Libre", Georgia, serif` ·
+`--font-text: "Geist", system-ui, sans-serif` ·
+`--font-mono: "Roboto Mono", ui-monospace, monospace` (counters, 400–500).
 
 ### Named type roles (from Figma → used across components)
 | Role | Family / weight | Size / line | Tracking |
 |---|---|---|---|
-| Hero H1 | Doto 900 | `clamp(2.4rem,5.4vw,4rem)` / 1.0 | −.01em, uppercase |
-| Section H2 (Doto) | Doto 900 | `clamp(2rem,6vw,4rem)` per section | −.01em, uppercase |
-| Card title (H3) | IBM Plex 500 | 1.5rem / 1.33 | −.015em |
-| **Label/Medium** | IBM Plex **500** | **16px / 24px** | **−.011em** — the button/label default |
-| Label/Small | IBM Plex 500 | 14px / 20px | −.006em |
-| Paragraph/Large | IBM Plex 400 | 1.125rem / 1.5 | — |
-| Paragraph/Small | IBM Plex 400 | 14px / 20px | −.006em |
-| Eyebrow / 2XS | IBM Plex 500 | 11–12px | uppercase, wide tracking (.02–.04em) |
+| Hero H1 | Averia 700 | `clamp(2.4rem,5.4vw,4rem)` / 1.0 | −.01em, uppercase |
+| Section H2 | Averia 700 | `clamp(2rem,6vw,4rem)` per section | −.01em, uppercase |
+| Card title (H3) | Geist 500 | 1.5rem / 1.33 | −.015em |
+| **Label/Medium** | Geist **500** | **16px / 24px** | **−.011em** — the button/label default |
+| Label/Small | Geist 500 | 14px / 20px | −.006em |
+| Paragraph/Large | Geist 400 | 1.125rem / 1.5 | — |
+| Paragraph/Small | Geist 400 | 14px / 20px | −.006em |
+| Eyebrow / 2XS | Geist 500 | 11–12px | uppercase, wide tracking (.02–.04em) |
 
 **Rule of thumb:** any button or form label = **Label/Medium** (500, 16/24,
 −.011em). Set `font-weight: 500` explicitly — don’t rely on inheritance (buttons
@@ -184,7 +185,7 @@ server-rendered partial. Wraps to its own row under 820px.
 
 ### Detail page (`.pd`)
 Single 48rem column under the absolute header (`padding-top: --header-h + 3rem`):
-back link (pixel arrow, Label/Small) → logo tile + Doto 900 title (`data-decode`) → description
+back link (pixel arrow, Label/Small) → logo tile + Averia 700 title (`data-decode`) → description
 (Paragraph/Large) → tags → actions (primary "Visitar") → "¿Es tu
 proyecto? Solicita cambios".
 
@@ -217,7 +218,7 @@ Supports a “max N selected” rule by disabling unchecked inputs (JS).
 - Card: bg `--bg`, border `--sky-alpha-16`, **radius 16px**, `max-height:
   calc(100dvh - 2rem)` with the body scrolling.
 - `::backdrop`: `rgba(0,10,17,.72)` + `blur(2px)`.
-- Header: Doto title (24/32, `--blue-500`) + `--blue-700` subtitle + 24px close
+- Header: Averia title (24/32, `--blue-500`) + `--blue-700` subtitle + 24px close
   (`--blue-800`, hover `--blue-50`); `.modal-divider` = `--sky-alpha-16`.
 - Behavior: open with `dialog.showModal()`; close on ✕ / Cancel / **backdrop
   click** / **Esc** (native). Get focus‑trap + background `inert` for free.
@@ -230,7 +231,7 @@ Supports a “max N selected” rule by disabling unchecked inputs (JS).
 
 ## 6. Icons
 
-- **Style:** pixel/8‑bit glyphs matching Doto (brackets, arrows, smile, external‑link,
+- **Style:** pixel/8‑bit glyphs matching the display face (brackets, arrows, smile, external‑link,
   close, upload). Social icons are standard brand marks.
 - **Convention:** inline the SVG `<path>` in markup and set
   **`fill="currentColor"`** so the icon inherits text color and reacts to
@@ -304,7 +305,7 @@ stays readable, and content on top via `z-index`. Instances pause off‑screen v
 
 1. Copy the `:root` block from `global.css` — the color + slate + sky‑alpha
    tokens are a ready starter system.
-2. Load **Doto** + **IBM Plex Sans**; keep the two‑family rule and one accent.
+2. Load **Averia Serif Libre** + **Geist**; keep the two‑family rule and one accent.
 3. Copy `scroll-reveal.js` + its CSS for `data-decode` / `data-reveal`.
 4. Keep `ascii-background.js` (the `data-ascii-src` engine) for image‑driven
    backgrounds.
