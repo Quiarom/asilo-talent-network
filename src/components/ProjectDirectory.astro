@@ -43,7 +43,6 @@ const { projects, sort = DEFAULT_SORT, modalOnly = false } = Astro.props;
 <ProjectFormModal mode="create" />
 
 <script>
-  import { gsap } from "gsap";
   import { startProjectRefresh } from "../lib/project-refresh";
 
   const projectCarousel = document.getElementById("project-directory-list");
@@ -116,7 +115,6 @@ const { projects, sort = DEFAULT_SORT, modalOnly = false } = Astro.props;
     const complete = () => {
       projectPageAnimating = false;
       projectNavButtons.forEach((button) => { button.disabled = false; });
-      gsap.set([...currentCards, ...nextCards], { clearProps: "willChange" });
       const firstCard = nextCards[0];
       firstCard?.querySelector<HTMLElement>(".prj-link")?.focus({ preventScroll: true });
       firstCard?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "nearest" });
@@ -137,27 +135,22 @@ const { projects, sort = DEFAULT_SORT, modalOnly = false } = Astro.props;
 
     projectPageAnimating = true;
     projectNavButtons.forEach((button) => { button.disabled = true; });
-    gsap.set([...currentCards, ...nextCards], { willChange: "transform,opacity" });
-    gsap.timeline({ onComplete: complete })
-      .to(currentCards, {
-        autoAlpha: 0,
-        y: -8,
-        duration: 0.14,
-        ease: "power2.in",
-        stagger: { each: 0.015, from: "end" },
+    // Fade the current cards out (last first), swap pages, then stagger the next ones in.
+    const out = currentCards.map((card, index) => card.animate(
+      [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(-8px)" }],
+      { duration: 140, delay: (currentCards.length - 1 - index) * 15, easing: "cubic-bezier(.55, .085, .68, .53)", fill: "both" },
+    ));
+    Promise.all(out.map((animation) => animation.finished))
+      .then(() => {
+        swapPages();
+        out.forEach((animation) => animation.cancel());
+        return Promise.all(nextCards.map((card, index) => card.animate(
+          [{ opacity: 0, transform: "translateY(16px)" }, { opacity: 1, transform: "none" }],
+          { duration: 500, delay: index * 60, easing: "cubic-bezier(.25, .46, .45, .94)", fill: "backwards" },
+        ).finished));
       })
-      .call(swapPages)
-      .fromTo(
-        nextCards,
-        { autoAlpha: 0, y: 16 },
-        {
-          autoAlpha: 1,
-          y: 0,
-          duration: 0.5,
-          ease: "power1.out",
-          stagger: 0.06,
-        },
-      );
+      .catch(() => swapPages())
+      .then(complete);
   };
 
   projectNavButtons.forEach((button) => {

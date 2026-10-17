@@ -28,7 +28,7 @@ describe("ProjectDirectory", () => {
     expect((html.match(/target="_blank" rel="noopener noreferrer"/g) ?? []).length).toBe(20);
     expect((html.match(/icons\/pixelarticons\/box\.svg/g) ?? []).length).toBe(20);
     expect(readFileSync(new URL("../src/components/ProjectDirectory.astro", import.meta.url), "utf8"))
-      .toContain("gsap.timeline");
+      .toContain("card.animate(");
   });
 
   it("renders the sort control as a plain GET form with the current order selected", async () => {
