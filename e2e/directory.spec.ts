@@ -24,15 +24,21 @@ test.describe("Proyectos directory", () => {
     await expect(page.locator("#project-count")).toContainText("12 proyectos");
   });
 
-  test("sorts A–Z and Z–A without reloading", async ({ page }) => {
-    await page.goto("/?orden=az");
+  test("re-sorts without reloading", async ({ page }) => {
+    await page.goto("/");
+    expect((await directoryTitles(page))[0]).toBe("Zeta Games");
+
+    await page.getByLabel("Ordenar").selectOption("az");
+    await expect(page).toHaveURL(/orden=az/);
     const az = await directoryTitles(page);
     expect(az).toEqual([...az].sort(collator.compare));
+  });
 
-    await page.getByLabel("Ordenar").selectOption("za");
-    await expect(page).toHaveURL(/orden=za/);
-    await expect(page.locator(".prj-name").first()).toHaveText("Zeta Games");
-    expect(await directoryTitles(page)).toEqual([...az].reverse());
+  test("keeps Z–A working for links shared before the tabs", async ({ page }) => {
+    await page.goto("/?orden=za");
+    const za = await directoryTitles(page);
+    expect(za[0]).toBe("Zeta Games");
+    expect(za).toEqual([...za].sort(collator.compare).reverse());
   });
 
   test("shows the newest projects first", async ({ page }) => {
@@ -43,21 +49,23 @@ test.describe("Proyectos directory", () => {
     expect(titles.at(-1)).toBe("Pana Pay");
   });
 
-  test("sorts /proyectos by most recent and syncs the URL", async ({ page }) => {
+  test("sorts /proyectos with the order tabs and syncs the URL", async ({ page }) => {
+    const first = page.locator("#project-results .prj-name:visible").first();
     await page.goto("/proyectos");
-    await page.locator("#project-sort summary").click();
-    await page.locator(".sort-option", { hasText: "Más recientes" }).click();
-    await expect(page).toHaveURL(/orden=recientes/);
-    await expect(page.locator("#sort-value")).toHaveText("Más recientes");
-    await expect(page.locator("#project-results .prj-name:visible").first()).toHaveText("Zeta Games");
+    await expect(page.getByRole("radio", { name: "Últimos añadidos" })).toBeChecked();
+    await expect(first).toHaveText("Zeta Games");
 
-    await page.goto("/proyectos?orden=recientes");
-    await expect(page.locator("#sort-value")).toHaveText("Más recientes");
-    await expect(page.locator("#project-results .prj-name:visible").first()).toHaveText("Zeta Games");
+    await page.getByText("A–Z", { exact: true }).click();
+    await expect(page).toHaveURL(/orden=az/);
+    await expect(page.getByRole("radio", { name: "A–Z" })).toBeChecked();
+    await expect(first).not.toHaveText("Zeta Games");
 
-    await page.locator("#project-sort summary").click();
-    await page.locator(".sort-option", { hasText: "Nombre: A–Z" }).click();
+    await page.goto("/proyectos?orden=az");
+    await expect(page.getByRole("radio", { name: "A–Z" })).toBeChecked();
+
+    await page.getByText("Últimos añadidos", { exact: true }).click();
     await expect(page).not.toHaveURL(/orden=/);
+    await expect(first).toHaveText("Zeta Games");
   });
 
   test("opens a project's page from its card", async ({ page }) => {
@@ -73,9 +81,10 @@ test.describe("without JavaScript", () => {
 
   test("the sort control still works as a plain form", async ({ page }) => {
     await page.goto("/");
-    await page.getByLabel("Ordenar").selectOption("za");
+    await page.getByLabel("Ordenar").selectOption("az");
     await page.getByRole("button", { name: "Aplicar" }).click();
-    await expect(page).toHaveURL(/orden=za/);
-    await expect(page.locator(".prj-name").first()).toHaveText("Zeta Games");
+    await expect(page).toHaveURL(/orden=az/);
+    const titles = await directoryTitles(page);
+    expect(titles).toEqual([...titles].sort(collator.compare));
   });
 });

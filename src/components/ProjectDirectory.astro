@@ -1,6 +1,6 @@
 ---
 import type { Project } from "../data/projects";
-import { SORT_OPTIONS, type SortMode } from "../lib/project-sort";
+import { DEFAULT_SORT, SORT_OPTIONS, type SortMode } from "../lib/project-sort";
 import ProjectFormModal from "./ProjectFormModal.astro";
 import ProjectPages from "./ProjectPages.astro";
 
@@ -11,7 +11,7 @@ interface Props {
   modalOnly?: boolean;
 }
 
-const { projects, sort = "az", modalOnly = false } = Astro.props;
+const { projects, sort = DEFAULT_SORT, modalOnly = false } = Astro.props;
 ---
 
 {!modalOnly && <section class="prj" id="proyectos">

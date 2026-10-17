@@ -33,11 +33,11 @@ describe("ProjectDirectory", () => {
 
   it("renders the sort control as a plain GET form with the current order selected", async () => {
     const container = await AstroContainer.create();
-    const html = await container.renderToString(ProjectDirectory, { props: { projects: [], sort: "za" } });
+    const html = await container.renderToString(ProjectDirectory, { props: { projects: [], sort: "az" } });
 
     expect(html).toMatch(/<form class="prj-sort" method="get" action="\/#proyectos"/);
-    expect(html).toContain('<option value="za" selected>Nombre: Z–A</option>');
-    expect(html).toContain('<option value="az">Nombre: A–Z</option>');
+    expect(html).toContain('<option value="az" selected>A–Z</option>');
+    expect(html).toContain('<option value="recientes">Últimos añadidos</option>');
   });
 
   it("links published projects to their detail page and has no like controls", async () => {
@@ -62,8 +62,9 @@ describe("ProjectDirectory", () => {
     expect(html).not.toContain('href="https://panapay.com"');
     expect(html).not.toContain("data-like");
     expect(html).not.toContain("Más votados");
-    expect(html).toMatch(/<option value="recientes" selected>Más recientes<\/option>/);
-    expect(html).toContain('<option value="za">Nombre: Z–A</option>');
+    expect(html).toMatch(/<option value="recientes" selected>Últimos añadidos<\/option>/);
+    // Z–A stays reachable by URL only; it is not offered as an option.
+    expect(html).not.toContain('<option value="za"');
   });
 
   it("puts uploaded logos on the logo tile and keeps category icons otherwise", async () => {
@@ -110,7 +111,10 @@ describe("ProjectDirectory", () => {
     expect(component).toContain('data-submit-another');
     expect(component).toContain("playConfetti();");
     expect(component).toContain('layer.className = "modal-confetti"');
-    expect(component).toContain("Logo (opcional)");
+    // Logo: required for new projects, optional when requesting changes.
+    expect(component).toContain('{editing ? "Nuevo logo (opcional)" : "Logo"}');
+    expect(component).not.toContain("Logo (opcional)");
+    expect(component).toContain('dialog.dataset.mode === "edit" ? validateLogo(logoFile) : validateRequiredLogo(logoFile)');
   });
 
   it("uses explicit close controls without backdrop dismissal", () => {
@@ -135,7 +139,7 @@ describe("ProjectDirectory", () => {
     expect(styles).toContain('.modal-card > [data-form-view][hidden] { display: none; }');
     expect(styles).toContain("@keyframes modal-confetti-fall");
     expect(styles).toContain('.modal-success-check { width: 74px; height: 40px; }');
-    expect(styles).toContain('font-size: clamp(2rem, 5vw, 2.75rem)');
+    expect(styles).toContain('font-size: clamp(2.4rem, 6vw, 3.5rem)');
   });
 
   it("refreshes the directory in the background without reloading the page", () => {

@@ -97,6 +97,16 @@ const HEADER_ALIASES: Record<string, string> = {
   status: "approved",
   approved: "approved",
   approval: "approved",
+  // date added
+  fecha: "addedAt",
+  "fecha de registro": "addedAt",
+  "marca temporal": "addedAt",
+  timestamp: "addedAt",
+  // optional counters (numeric)
+  visitas: "visits",
+  visits: "visits",
+  tendencia: "trending",
+  trending: "trending",
   // logo
   "id del logo": "logoId",
   logo: "logoId",
@@ -126,7 +136,7 @@ export function resetProjectsCache(): void {
  * Rows are append-only revisions, so several approved rows can describe the
  * same project (same normalized website). The LAST approved revision wins —
  * that is how an approved edit request replaces the published card — while
- * `addedIndex` keeps the position of the first one for "Más recientes".
+ * `addedIndex` keeps the position of the first one for "Últimos añadidos".
  */
 export function parseProjects(values: string[][]): Project[] {
   const [headerRow = [], ...dataRows] = values;
@@ -256,6 +266,9 @@ function toProject(
 
   const id = projectIdFor(href);
   const logoUrl = logoViewUrl(cell("logoId"));
+  const addedAt = parseSheetDate(cell("addedAt"));
+  const visits = parseCount(cell("visits"));
+  const trending = parseCount(cell("trending"));
   return {
     id,
     slug: projectSlug(title, id),
@@ -267,7 +280,29 @@ function toProject(
     tags,
     ...(logoUrl ? { logoUrl } : {}),
     iconUrl: projectIconUrl(tags),
+    ...(addedAt !== undefined ? { addedAt } : {}),
+    ...(visits !== undefined ? { visits } : {}),
+    ...(trending !== undefined ? { trending } : {}),
   };
+}
+
+/** Accepts ISO dates and the es-VE `d/m/yyyy [h:mm[:ss]]` format Sheets exports. */
+export function parseSheetDate(raw: string): number | undefined {
+  const value = (raw ?? "").trim();
+  if (!value) return undefined;
+  const local = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[ ,T]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+  if (local) {
+    const [, d, m, y, hh = "0", mm = "0", ss = "0"] = local;
+    const time = Date.UTC(Number(y), Number(m) - 1, Number(d), Number(hh), Number(mm), Number(ss));
+    return Number.isFinite(time) ? time : undefined;
+  }
+  const time = Date.parse(value);
+  return Number.isFinite(time) ? time : undefined;
+}
+
+function parseCount(raw: string): number | undefined {
+  const value = Number((raw ?? "").replace(/[.,\s]/g, ""));
+  return raw.trim() && Number.isFinite(value) && value >= 0 ? value : undefined;
 }
 
 /**

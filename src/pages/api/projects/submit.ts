@@ -22,8 +22,8 @@
  *   GOOGLE_SHEETS_ID, GOOGLE_SERVICE_ACCOUNT_JSON_BASE64,
  *   GOOGLE_SHEETS_RANGE (optional, default "Projects!A1:M" — must cover the
  *   full A–M table so the header mapping sees J/K),
- *   APPWRITE_ENDPOINT, APPWRITE_PROJECT_ID, APPWRITE_API_KEY (optional —
- *   logo upload; a supplied logo requires all three values),
+ *   APPWRITE_ENDPOINT, APPWRITE_PROJECT_ID, APPWRITE_API_KEY (the logo is
+ *   mandatory, so submissions need all three values to be accepted),
  *   TURNSTILE_SITE_KEY, TURNSTILE_SECRET_KEY (optional — captcha; without them
  *   the captcha is skipped and the other anti-abuse layers still apply)
  */
@@ -45,7 +45,7 @@ import {
 } from "../../../lib/projects-submit";
 import { json } from "../../../lib/http";
 import { createRateLimiter } from "../../../lib/rate-limit";
-import { LOGO_BUCKET_ID, validateLogo } from "../../../lib/projects-logo";
+import { LOGO_BUCKET_ID, validateLogo, validateRequiredLogo } from "../../../lib/projects-logo";
 import { checkTurnstile } from "../../../lib/turnstile";
 
 export const prerender = false;
@@ -142,15 +142,16 @@ export async function POST({ request, clientAddress }: APIContext) {
     );
   }
 
-  // Optional logo: validate, then upload to Appwrite Storage when configured.
-  // A supplied logo must validate and upload successfully; never silently drop it.
+  // Logo: required for new projects; an edit request may omit it to keep the
+  // published one. A supplied logo must validate and upload successfully;
+  // never silently drop it.
   const logoRaw = form.get("logo");
   if (form.getAll("logo").length > 1 || (logoRaw !== null && !(logoRaw instanceof File))) {
     return json({ ok: false, field: "logo", error: "Selecciona un solo archivo de imagen." }, 400);
   }
   // FormData returns an empty File for an untouched file input.
   const logo = logoRaw instanceof File && (logoRaw.name !== "" || logoRaw.size > 0) ? logoRaw : null;
-  const logoCheck = validateLogo(logo);
+  const logoCheck = mode === "create" ? validateRequiredLogo(logo) : validateLogo(logo);
   if (!logoCheck.ok) {
     return json({ ok: false, field: "logo", error: logoCheck.error }, 400);
   }
@@ -260,7 +261,7 @@ export async function POST({ request, clientAddress }: APIContext) {
       );
     }
   } else if (preparedLogo?.ok) {
-    return json({ ok: false, field: "logo", error: "La carga de logos no está disponible. Inténtalo más tarde o quita el logo." }, 503);
+    return json({ ok: false, field: "logo", error: "La carga de logos no está disponible. Inténtalo más tarde." }, 503);
   }
 
   // A change request without a new logo keeps the published one.

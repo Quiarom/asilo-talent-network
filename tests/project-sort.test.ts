@@ -28,8 +28,17 @@ describe("sortProjects", () => {
     expect(titles(sortProjects(list, "za"))).toEqual(["zeta", "beta", "Ábaco"]);
   });
 
-  it("shows the newest additions first", () => {
+  it("shows the newest additions first (sheet row order, not the date text)", () => {
     expect(titles(sortProjects(list, "recientes"))).toEqual(["Ábaco", "zeta", "beta"]);
+    // Row order wins over the Fecha column; the date only breaks ties.
+    const dated = [project("vieja", { addedIndex: 5, addedAt: 1 }), project("nueva", { addedIndex: 9, addedAt: 0 })];
+    expect(titles(sortProjects(dated, "recientes"))).toEqual(["nueva", "vieja"]);
+  });
+
+  it("ranks by visits and trending, leaving projects without data last", () => {
+    const metrics = [project("a", { visits: 5, trending: 1 }), project("b"), project("c", { visits: 9, trending: 3 })];
+    expect(titles(sortProjects(metrics, "visitas"))).toEqual(["c", "a", "b"]);
+    expect(titles(sortProjects(metrics, "trending"))).toEqual(["c", "a", "b"]);
   });
 
   it("never mutates its input", () => {
@@ -43,9 +52,10 @@ describe("parseSortMode", () => {
   it("accepts known modes and falls back to the default", () => {
     expect(parseSortMode("za")).toBe("za");
     expect(parseSortMode("recientes")).toBe("recientes");
-    expect(parseSortMode("ZA")).toBe("az");
-    expect(parseSortMode(null)).toBe("az");
-    expect(parseSortMode("<script>")).toBe("az");
-    expect(parseSortMode("populares")).toBe("az");
+    expect(parseSortMode("visitas")).toBe("visitas");
+    expect(parseSortMode("ZA")).toBe("recientes");
+    expect(parseSortMode(null)).toBe("recientes");
+    expect(parseSortMode("<script>")).toBe("recientes");
+    expect(parseSortMode("populares")).toBe("recientes");
   });
 });

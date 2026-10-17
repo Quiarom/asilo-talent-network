@@ -27,12 +27,13 @@ Sheets integrations; see [membership form setup](docs/community-form.md).
 Membership applications must use a separate spreadsheet from projects and the
 member roster. Keep credentials server-only and out of commits.
 
-Optional project logo uploads use `APPWRITE_ENDPOINT`, `APPWRITE_PROJECT_ID`,
-and `APPWRITE_API_KEY`. Optional spam protection (Cloudflare Turnstile on the
+Project logo uploads use `APPWRITE_ENDPOINT`, `APPWRITE_PROJECT_ID` and
+`APPWRITE_API_KEY`; new projects must include a logo (edit requests may keep
+the current one). Optional spam protection (Cloudflare Turnstile on the
 project and community join forms) uses `TURNSTILE_SITE_KEY` and
 `TURNSTILE_SECRET_KEY` (the lowercase names `cloudflare_turnstile_site_key`
-and `turnstile_secret_key` are also accepted). These optional keys are
-included in `.env.example`.
+and `turnstile_secret_key` are also accepted). These keys are included in
+`.env.example`.
 
 ## Checks
 

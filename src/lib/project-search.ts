@@ -15,24 +15,27 @@ export function filterProjects<T extends Project>(projects: T[], query: string, 
   return sortProjects(matches, parseSortMode(order));
 }
 
-export const PROJECTS_PER_PAGE = 10;
+/** Results revealed up front, and by each "Ver más" press. */
+export const PROJECTS_PAGE_SIZE = 10;
 
-export function paginateProjects<T>(projects: T[], requestedPage: number) {
-  const totalPages = Math.max(1, Math.ceil(projects.length / PROJECTS_PER_PAGE));
-  const page = Math.min(totalPages, Math.max(1, Number.isFinite(requestedPage) ? Math.floor(requestedPage) : 1));
-  const offset = (page - 1) * PROJECTS_PER_PAGE;
-  return {
-    page, totalPages,
-    items: projects.slice(offset, offset + PROJECTS_PER_PAGE),
-    start: projects.length ? offset + 1 : 0,
-    end: Math.min(offset + PROJECTS_PER_PAGE, projects.length),
-  };
+/** Clamps a requested visible count to whole steps of PROJECTS_PAGE_SIZE (min 10). */
+export function normalizeVisibleLimit(requested: number) {
+  const value = Number.isFinite(requested) ? Math.floor(requested) : PROJECTS_PAGE_SIZE;
+  return Math.max(PROJECTS_PAGE_SIZE, Math.ceil(value / PROJECTS_PAGE_SIZE) * PROJECTS_PAGE_SIZE);
 }
 
-export function projectPageUrl(currentUrl: URL, page: number) {
+export function limitProjects<T>(projects: T[], requestedLimit: number) {
+  const limit = normalizeVisibleLimit(requestedLimit);
+  const shown = Math.min(limit, projects.length);
+  return { limit, items: projects.slice(0, limit), shown, total: projects.length, hasMore: projects.length > limit };
+}
+
+/** URL for the next batch; `mostrar` is only present once more than the initial 10 are visible. */
+export function showMoreUrl(currentUrl: URL, limit: number) {
   const url = new URL(currentUrl);
   url.searchParams.delete("pagina");
-  if (page > 1) url.searchParams.set("pagina", String(page));
+  if (limit > PROJECTS_PAGE_SIZE) url.searchParams.set("mostrar", String(limit));
+  else url.searchParams.delete("mostrar");
   url.hash = "project-results";
   return `${url.pathname}${url.search}${url.hash}`;
 }

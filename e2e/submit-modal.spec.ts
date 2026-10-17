@@ -15,10 +15,23 @@ test.describe("Add project modal", () => {
   });
 
   test("allows at most three categories", async ({ page }) => {
-    const rows = page.locator(".cat-row");
-    for (let i = 0; i < 3; i += 1) await rows.nth(i).click();
+    const dialog = page.getByRole("dialog");
+    for (const name of ["Edtech", "Fintech", "Legaltech"]) await pickCategory(dialog, name);
     await expect(page.locator("[data-cat-count]")).toHaveText("3 / 3 SELECCIONADAS");
-    await expect(rows.nth(3).locator("input")).toBeDisabled();
+    await expect(dialog.getByRole("button", { name: "Quitar Fintech" })).toBeVisible();
+    await expect(dialog.locator('.cat-checkbox[value="PropTech"]')).toBeDisabled();
+    await expect(dialog.getByText(/Máximo 3 categorías/)).toBeVisible();
+  });
+
+  test("filters categories as you type and picks one with Enter", async ({ page }) => {
+    const dialog = page.getByRole("dialog");
+    const combo = dialog.getByRole("combobox", { name: "Buscar y elegir categorías" });
+    await combo.fill("prop");
+    await expect(dialog.getByRole("option", { name: "PropTech" })).toBeVisible();
+    await expect(dialog.getByRole("option", { name: "Fintech" })).toBeHidden();
+    await combo.press("Enter");
+    await expect(page.locator("[data-cat-count]")).toHaveText("1 / 3 SELECCIONADAS");
+    await expect(dialog).toBeVisible();
   });
 
   test("closes only through its explicit controls, never on Escape, a backdrop click or a drag", async ({ page }) => {
@@ -143,10 +156,23 @@ test.describe("Add project modal", () => {
   });
 });
 
-async function fillValidProject(dialog: import("@playwright/test").Locator) {
+type Locator = import("@playwright/test").Locator;
+
+const PNG_1PX = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+  "base64",
+);
+
+async function pickCategory(dialog: Locator, name: string) {
+  await dialog.getByRole("combobox", { name: "Buscar y elegir categorías" }).click();
+  await dialog.getByRole("option", { name, exact: true }).click();
+}
+
+async function fillValidProject(dialog: Locator) {
   await dialog.getByLabel("Nombre del proyecto").fill("Mi Proyecto");
   await dialog.getByLabel("URL del sitio web").fill("miproyecto.example");
   await dialog.getByLabel("Descripción corta").fill("Una descripción clara del proyecto.");
   await dialog.getByLabel("Fundadores").fill("Ana");
-  await dialog.locator(".cat-row").first().click();
+  await dialog.locator('input[name="logo"]').setInputFiles({ name: "logo.png", mimeType: "image/png", buffer: PNG_1PX });
+  await pickCategory(dialog, "Fintech");
 }
