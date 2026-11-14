@@ -14,8 +14,8 @@
  *   GOOGLE_SHEETS_ID, GOOGLE_SERVICE_ACCOUNT_JSON_BASE64,
  *   GOOGLE_SHEETS_RANGE (optional, default "Projects!A1:M" — must cover the
  *   full A–M table so the header mapping sees J/K),
- *   APPWRITE_ENDPOINT, APPWRITE_PROJECT_ID, APPWRITE_API_KEY (optional —
- *   logo upload; a supplied logo requires all three values),
+ *   LOGO_STORAGE_PROVIDER and provider credentials (optional — see
+ *   docs/logo-storage.md; a supplied logo requires configured storage),
  *   TURNSTILE_SITE_KEY, TURNSTILE_SECRET_KEY (optional — captcha; without them
  *   the captcha is skipped and the other anti-abuse layers still apply)
  */
@@ -24,8 +24,7 @@ import { readSubmissionForm } from "../../../lib/submission-body";
 import { prepareLogo } from "../../../lib/projects-logo-server";
 import type { APIContext } from "astro";
 import googleSheets from "@googleapis/sheets";
-import { Client, ID, Permission, Role, Storage } from "node-appwrite";
-import { InputFile } from "node-appwrite/file";
+import { getLogoStorage, LogoStorageUnavailable } from "../../../lib/logo-storage";
 import {
   buildRowForHeaders,
   findDuplicateWebsite,
@@ -33,7 +32,7 @@ import {
   MIN_FILL_MS,
   validateSubmissionForm,
 } from "../../../lib/projects-submit";
-import { LOGO_BUCKET_ID, validateLogo } from "../../../lib/projects-logo";
+import { validateLogo } from "../../../lib/projects-logo";
 import {
   turnstileConfigured,
   verifyTurnstile,
@@ -162,7 +161,7 @@ export async function POST({ request, clientAddress }: APIContext) {
     );
   }
 
-  // Optional logo: validate, then upload to Appwrite Storage when configured.
+  // Optional logo: validate, then upload to the configured storage provider.
   // A supplied logo must validate and upload successfully; never silently drop it.
   const logoRaw = form.get("logo");
   if (form.getAll("logo").length > 1 || (logoRaw !== null && !(logoRaw instanceof File))) {
@@ -235,29 +234,14 @@ export async function POST({ request, clientAddress }: APIContext) {
   }
 
   let logoId: string | undefined;
-  if (
-    preparedLogo?.ok &&
-    import.meta.env.APPWRITE_ENDPOINT &&
-    import.meta.env.APPWRITE_PROJECT_ID &&
-    import.meta.env.APPWRITE_API_KEY
-  ) {
+  if (preparedLogo?.ok) {
     try {
-      const appwrite = new Client()
-        .setEndpoint(import.meta.env.APPWRITE_ENDPOINT)
-        .setProject(import.meta.env.APPWRITE_PROJECT_ID)
-        .setKey(import.meta.env.APPWRITE_API_KEY);
-      const storage = new Storage(appwrite);
-      const uploaded = await storage.createFile({
-        bucketId: LOGO_BUCKET_ID,
-        fileId: ID.unique(),
-        file: InputFile.fromBuffer(preparedLogo.buffer, preparedLogo.filename),
-        // Public directory: logos must be anonymously readable. `fileSecurity`
-        // is disabled on the bucket so this file-level ACL (not the bucket
-        // default) is what the view endpoint resolves.
-        permissions: [Permission.read(Role.any())],
-      });
-      logoId = uploaded.$id;
-    } catch {
+      const storage = await getLogoStorage();
+      logoId = await storage.upload(preparedLogo);
+    } catch (error) {
+      if (error instanceof LogoStorageUnavailable) {
+        return json({ ok: false, field: "logo", error: "La carga de logos no está disponible. Intentá más tarde o quitá el logo." }, 503);
+      }
       return json(
         {
           ok: false,
@@ -266,8 +250,6 @@ export async function POST({ request, clientAddress }: APIContext) {
         503,
       );
     }
-  } else if (preparedLogo?.ok) {
-    return json({ ok: false, field: "logo", error: "La carga de logos no está disponible. Intentá más tarde o quitá el logo." }, 503);
   }
 
   let row: string[];

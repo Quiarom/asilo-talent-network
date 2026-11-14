@@ -31,7 +31,7 @@ import {
   projects as placeholderProjects,
   type Project,
 } from "../data/projects";
-import { LOGO_BUCKET_ID } from "./projects-logo";
+import { logoUrlForReference } from "./logo-storage/public-url";
 import { projectIconUrl } from "./project-icons";
 
 const READONLY_SCOPE = "https://www.googleapis.com/auth/spreadsheets.readonly";
@@ -245,7 +245,7 @@ function toProject(
     .map((tag) => tag.trim())
     .filter(Boolean);
 
-  const logoUrl = logoViewUrl(cell("logoId"));
+  const logoUrl = logoUrlForReference(cell("logoId"));
   return {
     href,
     title,
@@ -255,24 +255,6 @@ function toProject(
     ...(logoUrl ? { logoUrl } : {}),
     iconUrl: projectIconUrl(tags),
   };
-}
-
-/**
- * Builds the public Appwrite view URL for a logo file id, or `undefined` when
- * there is no logo or the Appwrite config is absent. The logo bucket is public
- * (read `any`, `fileSecurity:false`), so a browser can render it directly. The
- * `?project=` query param is REQUIRED for anonymous (session-less) requests so
- * Appwrite knows which project resolves the file — omitting it returns 404.
- */
-function logoViewUrl(logoId: string): string | undefined {
-  const id = (logoId ?? "").trim();
-  const endpoint = import.meta.env.APPWRITE_ENDPOINT;
-  const projectId = import.meta.env.APPWRITE_PROJECT_ID;
-  if (!id || !endpoint || !projectId) return undefined;
-  const base = endpoint.replace(/\/+$/, "");
-  return `${base}/storage/buckets/${encodeURIComponent(
-    LOGO_BUCKET_ID,
-  )}/files/${encodeURIComponent(id)}/view?project=${encodeURIComponent(projectId)}`;
 }
 
 // Rejects malformed URLs and any scheme other than http/https
