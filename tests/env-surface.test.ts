@@ -18,9 +18,12 @@ const SURFACES: Array<{ file: string; envVar: string }> = [
   { file: "pages/api/projects/submit.ts", envVar: "GOOGLE_SHEETS_ID" },
   { file: "pages/api/projects/submit.ts", envVar: "GOOGLE_SERVICE_ACCOUNT_JSON_BASE64" },
   { file: "pages/api/projects/submit.ts", envVar: "GOOGLE_SHEETS_RANGE" },
-  { file: "pages/api/projects/submit.ts", envVar: "APPWRITE_ENDPOINT" },
-  { file: "pages/api/projects/submit.ts", envVar: "APPWRITE_PROJECT_ID" },
-  { file: "pages/api/projects/submit.ts", envVar: "APPWRITE_API_KEY" },
+  ...["APPWRITE_ENDPOINT", "APPWRITE_PROJECT_ID", "APPWRITE_API_KEY", "LOGO_STORAGE_PROVIDER",
+    "LOGO_S3_ENDPOINT", "LOGO_S3_REGION", "LOGO_S3_BUCKET", "LOGO_S3_ACCESS_KEY_ID",
+    "LOGO_S3_SECRET_ACCESS_KEY", "LOGO_S3_PUBLIC_BASE_URL", "LOGO_S3_FORCE_PATH_STYLE"]
+    .map((envVar) => ({ file: "lib/logo-storage/index.ts", envVar })),
+  ...["APPWRITE_ENDPOINT", "APPWRITE_PROJECT_ID", "LOGO_S3_PUBLIC_BASE_URL", "LOGO_LEGACY_PUBLIC_BASE_URL"]
+    .map((envVar) => ({ file: "lib/logo-storage/public-url.ts", envVar })),
   { file: "lib/turnstile.ts", envVar: "TURNSTILE_SITE_KEY" },
   { file: "lib/turnstile.ts", envVar: "TURNSTILE_SECRET_KEY" },
   { file: "pages/api/projects/submit.ts", envVar: "TURNSTILE_SECRET_KEY" },
@@ -28,7 +31,7 @@ const SURFACES: Array<{ file: string; envVar: string }> = [
 ];
 
 describe("env read surface", () => {
-  it("reads Google and Appwrite config via import.meta.env, never process.env", () => {
+  it("reads integration config via import.meta.env, never process.env", () => {
     for (const { file, envVar } of SURFACES) {
       const text = readFileSync(src(file), "utf8");
       expect(

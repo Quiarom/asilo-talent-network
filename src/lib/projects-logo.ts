@@ -2,9 +2,9 @@ import { z } from "zod";
 
 /**
  * Pure, network-free gate for the optional project-logo upload. The submit
- * endpoint only touches Appwrite Storage after this validation passes; the
- * modal mirrors these rules client-side for instant feedback. No Appwrite
- * import here so this module stays unit-testable without a network.
+ * endpoint only touches storage after this validation passes; the modal
+ * mirrors these rules client-side for instant feedback. No storage SDK
+ * imports here so this module also stays safe to import in the browser.
  */
 
 export const LOGO_BUCKET_ID = "project-logos";

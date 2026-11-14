@@ -2,7 +2,8 @@
 
 Spanish-language community site and project directory for Venezuelan builders.
 Built with Astro SSR and the Vercel adapter. Project submissions and approved
-listings use Google Sheets; uploaded logos use Appwrite Storage.
+listings use Google Sheets; logos can use Appwrite Storage or S3-compatible
+storage (including Cloudflare R2 and AWS S3).
 
 Browse projects at `/proyectos` or apply to join the community from the homepage.
 
@@ -21,9 +22,12 @@ Sheets integrations; see [membership form setup](docs/community-form.md).
 Membership applications must use a separate spreadsheet from projects and the
 member roster. Keep credentials server-only and out of commits.
 
-Optional project logo uploads use `APPWRITE_ENDPOINT`, `APPWRITE_PROJECT_ID`,
-and `APPWRITE_API_KEY`. Optional spam protection uses `TURNSTILE_SITE_KEY`
-and `TURNSTILE_SECRET_KEY`. These optional keys are included in `.env.example`.
+Optional project logo uploads default to Appwrite, preserving existing settings.
+Set `LOGO_STORAGE_PROVIDER=s3` and the `LOGO_S3_*` variables to use an
+S3-compatible bucket. See [logo storage and migration](docs/logo-storage.md)
+before switching providers or removing Appwrite. Optional spam protection uses
+`TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY`. These keys are included in
+`.env.example` and must remain server-only (except the captcha site key).
 
 ## Checks
 

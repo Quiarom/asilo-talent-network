@@ -5,6 +5,11 @@ const sheets = vi.hoisted(() => ({
   append: vi.fn(),
 }));
 const storage = vi.hoisted(() => ({ createFile: vi.fn() }));
+const s3 = vi.hoisted(() => ({ send: vi.fn(), destroy: vi.fn() }));
+vi.mock("@aws-sdk/client-s3", async (importOriginal) => ({
+  ...await importOriginal<typeof import("@aws-sdk/client-s3")>(),
+  S3Client: class { send = s3.send; destroy = s3.destroy; },
+}));
 vi.mock("node-appwrite", async (importOriginal) => ({
   ...await importOriginal<typeof import("node-appwrite")>(),
   Storage: class { createFile = storage.createFile; },
@@ -61,6 +66,8 @@ beforeEach(() => {
   vi.stubEnv("TURNSTILE_SECRET_KEY", "");
   vi.stubEnv("DEV_ALLOW_DUPLICATE_WEBSITE", "");
   storage.createFile.mockResolvedValue({ $id: "sanitized-logo-id" });
+  s3.send.mockResolvedValue({});
+  vi.stubEnv("LOGO_STORAGE_PROVIDER", "");
   vi.stubEnv("APPWRITE_ENDPOINT", "");
   vi.stubEnv("APPWRITE_PROJECT_ID", "");
   vi.stubEnv("APPWRITE_API_KEY", "");
@@ -201,6 +208,40 @@ describe("POST /api/projects/submit validation", () => {
     sheets.append.mockClear();
     storage.createFile.mockRejectedValueOnce(new Error("Storage unavailable"));
     expect((await submit({}, edit)).status).toBe(503);
+    expect(sheets.append).not.toHaveBeenCalled();
+  });
+
+  it("stores an S3 reference only after uploading sanitized WebP; failures never append or expose credentials", async () => {
+    vi.stubEnv("LOGO_STORAGE_PROVIDER", "s3");
+    vi.stubEnv("LOGO_S3_ENDPOINT", "https://account.r2.cloudflarestorage.com");
+    vi.stubEnv("LOGO_S3_REGION", "auto");
+    vi.stubEnv("LOGO_S3_BUCKET", "logos");
+    vi.stubEnv("LOGO_S3_ACCESS_KEY_ID", "test-access");
+    vi.stubEnv("LOGO_S3_SECRET_ACCESS_KEY", "test-secret");
+    vi.stubEnv("LOGO_S3_PUBLIC_BASE_URL", "https://logos.example.com");
+    vi.stubEnv("LOGO_S3_FORCE_PATH_STYLE", "false");
+    const png = await sharp({ create: { width: 8, height: 8, channels: 3, background: "red" } }).png().toBuffer();
+    const edit = (form: FormData) => form.set("logo", new Blob([new Uint8Array(png)], { type: "image/png" }), "original.png");
+    expect((await submit({}, edit)).status).toBe(201);
+    const upload = s3.send.mock.calls[0][0].input;
+    expect((await sharp(upload.Body).metadata()).format).toBe("webp");
+    expect(upload.ContentType).toBe("image/webp");
+    expect(sheets.append.mock.calls[0][0].requestBody.values[0][9]).toBe(`s3:${upload.Key}`);
+    expect(storage.createFile).not.toHaveBeenCalled();
+
+    sheets.append.mockClear();
+    s3.send.mockRejectedValueOnce(new Error("test-secret: upstream failure"));
+    const failed = await submit({}, edit);
+    expect(failed.status).toBe(503);
+    expect(await failed.text()).not.toContain("test-secret");
+    expect(sheets.append).not.toHaveBeenCalled();
+
+    vi.stubEnv("LOGO_S3_PUBLIC_BASE_URL", "");
+    s3.send.mockClear();
+    const unconfigured = await submit({}, edit);
+    expect(unconfigured.status).toBe(503);
+    expect(await unconfigured.json()).toMatchObject({ field: "logo" });
+    expect(s3.send).not.toHaveBeenCalled();
     expect(sheets.append).not.toHaveBeenCalled();
   });
 
